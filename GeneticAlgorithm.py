@@ -140,8 +140,11 @@ class GeneticAlgorithm():
 
         # Store the best score for each generation
         generation_scores = [self.best_solution.evaluation_score]
+        avg_scores = [self.sum_avaliation() / self.population_size] 
+        
         for _ in range(num_generations):
             total_score = self.sum_avaliation()
+            avg_scores.append(total_score / self.population_size)  #Store avg fitness
             new_population = []
 
             # Preserve the top N individuals (Elitism)
@@ -179,7 +182,7 @@ class GeneticAlgorithm():
         
         
         if generate_graphic:
-            Visualization.plot_generation_scores(generation_scores)
+            Visualization.plot_generation_scores(generation_scores, avg_scores)
         
         return self.best_solution.chromosome,  generation_scores
     

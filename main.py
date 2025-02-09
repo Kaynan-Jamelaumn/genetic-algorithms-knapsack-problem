@@ -34,9 +34,9 @@ spaces = [product.volume for product in products]
 prices = [product.price for product in products]
 
 # Genetic Algorithm parameters
-population_size = 50
-mutation_rate = 0.05
-num_generations = 100
+population_size = 200
+mutation_rate = 0.34
+num_generations = 50
 total_space = 10  # Knapsack capacity
 selection_method = "roulette"  # Can be changed to other methods
 crossover_method = "single_point"  # Can be changed to other methods
