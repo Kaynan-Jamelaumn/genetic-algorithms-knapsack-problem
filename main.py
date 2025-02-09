@@ -1,7 +1,6 @@
 from GeneticAlgorithm import GeneticAlgorithm
 from Product import Product
 from random import seed
-
 # Seed for reproducibility
 #seed(42)
 
@@ -44,7 +43,19 @@ crossover_method = "single_point"  # Can be changed to other methods
 
 # Initialize and run the genetic algorithm
 ga = GeneticAlgorithm(population_size, selection_method, crossover_method)
-best_solution = ga.solve(mutation_rate, num_generations, spaces, prices, total_space)
+best_solution, generation_scores  = ga.solve(mutation_rate, num_generations, spaces, prices, total_space)
+
+# Visualize the final best solution
+selected_products = [products[i].name for i, gene in enumerate(best_solution) if gene == 1]
+selected_spaces = [products[i].volume for i, gene in enumerate(best_solution) if gene == 1]
+selected_prices = [products[i].price for i, gene in enumerate(best_solution) if gene == 1]
+
+print("\nSelected Products in the Best Solution:")
+for product, space, price in zip(selected_products, selected_spaces, selected_prices):
+    print(f"{product}: Space = {space}, Price = {price}")
+
+print(f"\nTotal Space Used: {sum(selected_spaces)}")
+print(f"Total Price: {sum(selected_prices)}")
 
 print("\nFinal Best Solution:")
 print(f"Chromosome: {best_solution}")
