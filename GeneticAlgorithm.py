@@ -3,9 +3,10 @@ from Individual import Individual
 from SelectionMethods import *
 from Visualization import *
 from CrossOverMethods import *
+from MutationMethods import *
 
 class GeneticAlgorithm():
-    def __init__(self, population_size: int, selection_method: str ="roulette", crossover_method:str ="single_point"):
+    def __init__(self, population_size: int, selection_method: str ="roulette", crossover_method:str ="single_point", mutation_method:str ="mutation"):
         """
         Initialize the Genetic Algorithm with the given parameters.
         
@@ -17,6 +18,7 @@ class GeneticAlgorithm():
         self.population_size = population_size  # Size of the population
         self.selection_method = selection_method  # Selection method to use
         self.crossover_method = crossover_method  # Crossover method to use
+        self.mutation_method = mutation_method # mutation method to use
         self.population = []  # List to hold the population of individuals
         self.generation = 0  # Current generation number
         self.best_solution = None  # Best solution found so far
@@ -45,6 +47,14 @@ class GeneticAlgorithm():
             "two_point": CrossoverMethods.two_point_crossover,
             "arithmetic": CrossoverMethods.arithmetic_crossover,
             "half_uniform": CrossoverMethods.half_uniform_crossover
+        }
+
+        # Mapping of mutation methods
+        self.mutation_methods = {
+            "mutation": MutationMethods.mutation,
+            "swap_mutation": MutationMethods.swap_mutation,
+            "scramble_mutation": MutationMethods.scramble_mutation,
+            "random": MutationMethods.random_mutation,
         }
 
     def initialize_population(self, spaces, values, space_limit) -> None:
@@ -108,6 +118,20 @@ class GeneticAlgorithm():
         else:
             return method(self.population)
 
+    def apply_mutation(self, individual, mutation_chance):
+        """
+        Apply the specified mutation method to the individual.
+        """
+        if self.mutation_method not in self.mutation_methods:
+            raise ValueError(f"Invalid mutation method: {self.mutation_method}")
+        mutation_function = self.mutation_methods[self.mutation_method]
+          
+        if self.mutation_method == "swap_mutation" or self.mutation_method == "scramble_mutation":
+            mutation_function(individual)
+        else:
+            mutation_function(individual, mutation_chance)
+
+        
 
     def visualize_generation(self) -> None:
         """
@@ -183,8 +207,8 @@ class GeneticAlgorithm():
                 parent2 = self.select_parent(total_score)
                 child1, child2 = self.apply_crossover(parent1, parent2)
                 
-                child1.mutation(adapted_mutation_rate)
-                child2.mutation(adapted_mutation_rate)
+                self.apply_mutation(child1, adapted_mutation_rate)
+                self.apply_mutation(child2, adapted_mutation_rate)
                 
                 new_population.append(child1)
                 new_population.append(child2)

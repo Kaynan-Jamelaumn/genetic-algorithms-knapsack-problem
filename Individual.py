@@ -1,5 +1,5 @@
 from __future__ import annotations  # Enable forward references for type hints
-from random import randint, random 
+from random import randint, random, sample
 
 class Individual:
     def __init__(self, space: list[float], price: list[float], total_space: int, generation: int = 0):
@@ -162,3 +162,20 @@ class Individual:
         """
         # Flip genes with a probability of `mutation_chance`
         self.chromosome = [gene ^ 1 if random() < mutation_chance else gene for gene in self.chromosome]
+
+    def swap_mutation(self):
+        """
+        Perform swap mutation by swapping two distinct genes in the chromosome.
+        """
+        if len(self.chromosome) > 1:
+            idx1, idx2 = sample(range(len(self.chromosome)), 2)
+            self.chromosome[idx1], self.chromosome[idx2] = self.chromosome[idx2], self.chromosome[idx1]
+
+    def scramble_mutation(self):
+        """
+        Perform scramble mutation by shuffling a random subsection of the chromosome.
+        """
+        if len(self.chromosome) > 1:
+            start, end = sorted(sample(range(len(self.chromosome)), 2))
+            if start < end:  # Ensure a valid range
+                self.chromosome[start:end] = random.sample(self.chromosome[start:end], len(self.chromosome[start:end]))

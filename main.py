@@ -36,10 +36,11 @@ prices = [product.price for product in products]
 # Genetic Algorithm parameters
 population_size = 200
 mutation_rate = 0.34
-num_generations = 50
+num_generations = 80
 total_space = 10  # Knapsack capacity
 selection_method = "roulette"  # Can be changed to other methods
 crossover_method = "single_point"  # Can be changed to other methods
+mutation_method = "swap_mutation"
 
 # Initialize and run the genetic algorithm
 ga = GeneticAlgorithm(population_size, selection_method, crossover_method)
