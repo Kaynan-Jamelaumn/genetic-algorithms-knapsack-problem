@@ -154,7 +154,7 @@ class Individual:
         
         return child1, child2
 
-    def mutation(self, mutation_chance: float):
+    def bit_flip(self, mutation_chance: float):
         """
         Perform mutation on the individual's chromosome.
         

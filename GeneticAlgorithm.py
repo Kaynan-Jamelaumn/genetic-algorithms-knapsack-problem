@@ -6,7 +6,7 @@ from CrossOverMethods import *
 from MutationMethods import *
 
 class GeneticAlgorithm():
-    def __init__(self, population_size: int, selection_method: str ="roulette", crossover_method:str ="single_point", mutation_method:str ="mutation"):
+    def __init__(self, population_size: int, selection_method: str ="roulette", crossover_method:str ="single_point", mutation_method:str ="bit_flip"):
         """
         Initialize the Genetic Algorithm with the given parameters.
         
@@ -51,7 +51,7 @@ class GeneticAlgorithm():
 
         # Mapping of mutation methods
         self.mutation_methods = {
-            "mutation": MutationMethods.mutation,
+            "bit_flip": MutationMethods.bit_flip,
             "swap_mutation": MutationMethods.swap_mutation,
             "scramble_mutation": MutationMethods.scramble_mutation,
             "random": MutationMethods.random_mutation,

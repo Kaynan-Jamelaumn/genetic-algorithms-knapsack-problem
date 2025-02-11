@@ -181,4 +181,33 @@ In addition to crossover, mutations introduce random changes to chromosomes with
 
 The choice of crossover method depends on the problem and desired balance between exploration and exploitation. Combine these methods with mutation to enhance performance and adaptability in genetic algorithms.
 
+# Mutation Methods in Genetic Algorithms
 
+Mutation is a key genetic algorithm (GA) operation that helps maintain diversity (random changes) in a population and prevents premature convergence to a local optimum. Different mutation methods introduce various types of randomness into the genetic code of an individual. Below are common mutation techniques and their implementations.
+
+## 1. Bit-Flip Mutation
+
+### Description:
+- Each gene in the chromosome has a probability of flipping (0 → 1 or 1 → 0).
+- Helps maintain genetic diversity while making small, localized changes.
+
+## 2. Swap Mutation
+
+### Description:
+- Two randomly chosen genes in the chromosome swap positions.
+- Useful for problems where order matters (e.g., scheduling, traveling salesman problem).
+
+## 3. Scramble Mutation
+
+### Description:
+- A random subsection of the chromosome is shuffled.
+- Preserves the number of selected genes while introducing variation.
+- Useful for permutation-based problems like ordering tasks in a schedule.
+
+## Summary
+
+| Mutation Type     | Effect                                        | Best Use Case                  |
+|------------------|--------------------------------|--------------------------------|
+| **Bit-Flip Mutation**  | Randomly flips bits (0 ↔ 1) in binary chromosomes | Binary representation problems |
+| **Swap Mutation**      | Swaps two genes' positions in a chromosome | Order-based problems |
+| **Scramble Mutation**  | Randomly shuffles a portion of the chromosome | Permutation-based problems |

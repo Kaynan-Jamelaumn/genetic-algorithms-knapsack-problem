@@ -3,7 +3,7 @@ import random
 
 class MutationMethods:
     @staticmethod
-    def mutation(individual, mutation_chance):
+    def bit_flip(individual, mutation_chance):
         """
         Perform bit-flip mutation on an individual's chromosome.
         """
