@@ -7,7 +7,7 @@ class MutationMethods:
         """
         Perform bit-flip mutation on an individual's chromosome.
         """
-        individual.mutation(mutation_chance)
+        individual.bit_flip(mutation_chance)
 
     @staticmethod
     def swap_mutation(individual):

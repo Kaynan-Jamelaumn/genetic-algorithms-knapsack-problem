@@ -6,7 +6,7 @@ from CrossOverMethods import *
 from MutationMethods import *
 
 class GeneticAlgorithm():
-    def __init__(self, population_size: int, selection_method: str ="roulette", crossover_method:str ="single_point", mutation_method:str ="bit_flip"):
+    def __init__(self, population_size: int, selection_method: str ="roulette", crossover_method:str ="single_point", mutation_method:str ="bit_flip", use_island_model: bool = True, num_islands: int = 4, migration_interval: int = 10, migration_rate: float = 0.1):
         """
         Initialize the Genetic Algorithm with the given parameters.
         
@@ -19,6 +19,12 @@ class GeneticAlgorithm():
         self.selection_method = selection_method  # Selection method to use
         self.crossover_method = crossover_method  # Crossover method to use
         self.mutation_method = mutation_method # mutation method to use
+        self.use_island_model = use_island_model
+        self.num_islands = num_islands
+        self.migration_interval = migration_interval
+        self.migration_rate = migration_rate
+
+
         self.population = []  # List to hold the population of individuals
         self.generation = 0  # Current generation number
         self.best_solution = None  # Best solution found so far
@@ -84,9 +90,11 @@ class GeneticAlgorithm():
         if individual.evaluation_score > self.best_solution.evaluation_score:
             self.best_solution = individual
 
-    def sum_avaliation(self) -> float:
+    def sum_avaliation(self, population=None) -> float:
         """Calculate the total evaluation score of the population."""
-        return sum(ind.evaluation_score for ind in self.population)
+        if population is None:
+            population = self.population
+        return sum(ind.evaluation_score for ind in population)
     
     def apply_crossover(self, parent1, parent2) -> tuple[Individual, Individual]:
         """
@@ -100,23 +108,27 @@ class GeneticAlgorithm():
             raise ValueError(f"Invalid crossover method: {self.crossover_method}")
         return self.crossover_methods[self.crossover_method](parent1, parent2)
 
-    def select_parent(self, total_score) -> Individual:
+    def select_parent(self,  total_score, population=None) -> Individual:
         """
         Select a parent based on the chosen selection method.
         
         :param total_score: The total evaluation score of the population (used for some selection methods).
         :return: The selected parent.
         """
+
+        if population is None:
+            population = self.population
         if self.selection_method not in self.selection_methods:
             raise ValueError(f"Invalid selection method: {self.selection_method}")
-        
+
         # Call the appropriate selection method dynamically
         method = self.selection_methods[self.selection_method]
-        
         if method in {SelectionMethods.roulette_selection, SelectionMethods.sus_selection}:
-            return method(self.population, total_score)
+            return method(population, total_score)
         else:
-            return method(self.population)
+            return method(population)
+
+
 
     def apply_mutation(self, individual, mutation_chance):
         """
@@ -140,29 +152,31 @@ class GeneticAlgorithm():
         best = self.population[0]
         print(f"G:{best.generation} -> Score: {best.evaluation_score} Chromosome: {best.chromosome}")
 
-    def calculate_diversity(self):
+    def calculate_diversity(self,  population=None):
         """
         Get the diversity (how individuals are different from each other)
         """
+        if population is None:
+            population = self.population
+        pop_size = len(population)
         diversity = 0
-        for i in range(len(self.population)):
-            for j in range(i+1, len(self.population)):
+        for i in range(pop_size):
+            for j in range(i+1, pop_size):
                 diversity += sum(c1 != c2 for c1, c2 in zip(
-                    self.population[i].chromosome,
-                    self.population[j].chromosome))
-        return diversity / (self.population_size * (self.population_size - 1) / 2)
+                    population[i].chromosome,
+                    population[j].chromosome))
+        return diversity / (pop_size * (pop_size - 1) / 2) if pop_size > 1 else 0
 
-    def calculate_mutation_rate(self, adaptative_mutation : bool = True, mutation_rate : float = 0.5):
-
-        diversity = self.calculate_diversity()
-        if (adaptative_mutation):
-            return mutation_rate * (1 - diversity) # Higher diversity -> Lower mutation
+    def calculate_mutation_rate(self, adaptative_mutation: bool = True, mutation_rate: float = 0.5, population=None):
+        diversity = self.calculate_diversity(population)
+        if adaptative_mutation:
+            return mutation_rate * (1 - diversity)  # Higher diversity -> Lower mutation
         else: 
-            return  mutation_rate
+            return mutation_rate
 
 
 
-    def solve(self, mutation_rate, num_generations, spaces, values, space_limit, generate_graphic=True, adaptative_mutation: bool = True,  elitism_chance: float| int = 0.05) -> list:
+    def solve(self, mutation_rate, num_generations, spaces, values, space_limit, generate_graphic:bool = True, adaptative_mutation: bool = True,  elitism_chance: float| int = 0.05) -> list:
         """
         Run the genetic algorithm to solve the problem.
         
@@ -186,44 +200,115 @@ class GeneticAlgorithm():
         # Store the best score for each generation
         generation_scores = [self.best_solution.evaluation_score]
         avg_scores = [self.sum_avaliation() / self.population_size] 
-        
-        for _ in range(num_generations):
-             # Calculate diversity and adjust mutation rate
-            adapted_mutation_rate = self.calculate_mutation_rate(adaptative_mutation, mutation_rate)
 
+        if self.use_island_model:
+            per_island = self.population_size // self.num_islands
+            islands = []
+            for i in range(self.num_islands):
+                start_idx = i * per_island
+                end_idx = (i + 1) * per_island
+                island = self.population[start_idx:end_idx]
+                islands.append(island)
+            if self.population_size % self.num_islands != 0:
+                remaining = self.population[self.num_islands * per_island:]
+                for i in range(len(remaining)):
+                    islands[i].append(remaining[i])
 
-            total_score = self.sum_avaliation()
-            avg_scores.append(total_score / self.population_size)  #Store avg fitness
-            new_population = []
-
-            # Preserve the top N individuals (Elitism)
-            elite_count = max(1, int(elitism_chance * self.population_size))
-            elites = self.population[:elite_count]
-            new_population.extend(elites)
-
-            # Generate the rest of the population
-            for _ in range((self.population_size - elite_count) // 2):
-                parent1 = self.select_parent(total_score)
-                parent2 = self.select_parent(total_score)
-                child1, child2 = self.apply_crossover(parent1, parent2)
+            for gen in range(num_generations):
+                for i in range(self.num_islands):
+                    island_pop = islands[i]
+                    adapted_mutation_rate = self.calculate_mutation_rate(adaptative_mutation, mutation_rate, island_pop)
+                    total_score = self.sum_avaliation(island_pop)
+                    elite_count = max(1, int(elitism_chance * len(island_pop)))
+                    elites = island_pop[:elite_count]
+                    new_population = list(elites)
+                    
+                    for _ in range((len(island_pop) - elite_count) // 2):
+                        parent1 = self.select_parent(total_score, island_pop)
+                        parent2 = self.select_parent(total_score, island_pop)
+                        child1, child2 = self.apply_crossover(parent1, parent2)
+                        self.apply_mutation(child1, adapted_mutation_rate)
+                        self.apply_mutation(child2, adapted_mutation_rate)
+                        new_population.append(child1)
+                        new_population.append(child2)
+                    
+                    new_population = new_population[:len(island_pop)]
+                    for ind in new_population:
+                        ind.evaluate()
+                    new_population.sort(key=lambda x: x.evaluation_score, reverse=True)
+                    island_best = new_population[0]
+                    if island_best.evaluation_score > self.best_solution.evaluation_score:
+                        self.best_solution = island_best
+                    islands[i] = new_population
                 
-                self.apply_mutation(child1, adapted_mutation_rate)
-                self.apply_mutation(child2, adapted_mutation_rate)
-                
-                new_population.append(child1)
-                new_population.append(child2)
+                generation_scores.append(self.best_solution.evaluation_score)
+                current_total = sum(self.sum_avaliation(island) for island in islands)
+                avg_scores.append(current_total / self.population_size)
 
-            self.population = new_population
-
-            for individual in self.population:
-                individual.evaluate()
+                if (gen + 1) % self.migration_interval == 0:
+                    migrants_per_island = int(len(islands[0]) * self.migration_rate)
+                    all_migrants = []
+                    for i in range(self.num_islands):
+                        migrants = islands[i][:migrants_per_island]
+                        all_migrants.extend(migrants)
+                        islands[i] = islands[i][migrants_per_island:]
+                    
+                    random.shuffle(all_migrants)
+                    migrants_per_island = len(all_migrants) // self.num_islands
+                    for i in range(self.num_islands):
+                        start = i * migrants_per_island
+                        end = (i + 1) * migrants_per_island
+                        if i == self.num_islands - 1:
+                            end = len(all_migrants)
+                        received = all_migrants[start:end]
+                        islands[i].extend(received)
+                        islands[i].sort(key=lambda x: x.evaluation_score, reverse=True)
+                        islands[i] = islands[i][:per_island]
             
+            self.population = []
+            for island in islands:
+                self.population.extend(island)
             self.sort_population()
-            self.visualize_generation()
-            best = self.population[0]
-            self.solution_list.append(best.evaluation_score)
-            self.update_best_individual(best)
-            generation_scores.append(best.evaluation_score)
+            self.best_solution = self.population[0]
+        else:
+        
+            for _ in range(num_generations):
+                # Calculate diversity and adjust mutation rate
+                adapted_mutation_rate = self.calculate_mutation_rate(adaptative_mutation, mutation_rate)
+
+
+                total_score = self.sum_avaliation()
+                avg_scores.append(total_score / self.population_size)  #Store avg fitness
+                new_population = []
+
+                # Preserve the top N individuals (Elitism)
+                elite_count = max(1, int(elitism_chance * self.population_size))
+                elites = self.population[:elite_count]
+                new_population.extend(elites)
+
+                # Generate the rest of the population
+                for _ in range((self.population_size - elite_count) // 2):
+                    parent1 = self.select_parent(total_score)
+                    parent2 = self.select_parent(total_score)
+                    child1, child2 = self.apply_crossover(parent1, parent2)
+                    
+                    self.apply_mutation(child1, adapted_mutation_rate)
+                    self.apply_mutation(child2, adapted_mutation_rate)
+                    
+                    new_population.append(child1)
+                    new_population.append(child2)
+
+                self.population = new_population
+
+                for individual in self.population:
+                    individual.evaluate()
+                
+                self.sort_population()
+                self.visualize_generation()
+                best = self.population[0]
+                self.solution_list.append(best.evaluation_score)
+                self.update_best_individual(best)
+                generation_scores.append(best.evaluation_score)
 
         print(f"\nBest solution -> G: {self.best_solution.generation}, "
               f"Score: {self.best_solution.evaluation_score}, "
