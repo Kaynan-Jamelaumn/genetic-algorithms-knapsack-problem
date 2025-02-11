@@ -117,6 +117,20 @@ class GeneticAlgorithm():
         best = self.population[0]
         print(f"G:{best.generation} -> Score: {best.evaluation_score} Chromosome: {best.chromosome}")
 
+    def calculate_diversity(self):
+        """
+        Get the diversity (how individuals are different from each other)
+        """
+        diversity = 0
+        for i in range(len(self.population)):
+            for j in range(i+1, len(self.population)):
+                diversity += sum(c1 != c2 for c1, c2 in zip(
+                    self.population[i].chromosome,
+                    self.population[j].chromosome))
+        return diversity / (self.population_size * (self.population_size - 1) / 2)
+
+
+
     def solve(self, mutation_rate, num_generations, spaces, values, space_limit, generate_graphic=True) -> list:
         """
         Run the genetic algorithm to solve the problem.
@@ -143,6 +157,11 @@ class GeneticAlgorithm():
         avg_scores = [self.sum_avaliation() / self.population_size] 
         
         for _ in range(num_generations):
+             # Calculate diversity and adjust mutation rate
+            diversity = self.calculate_diversity()
+            adapted_mutation_rate = mutation_rate * (1 - diversity)  # Higher diversity -> Lower mutation
+
+
             total_score = self.sum_avaliation()
             avg_scores.append(total_score / self.population_size)  #Store avg fitness
             new_population = []
@@ -158,8 +177,8 @@ class GeneticAlgorithm():
                 parent2 = self.select_parent(total_score)
                 child1, child2 = self.apply_crossover(parent1, parent2)
                 
-                child1.mutation(mutation_rate)
-                child2.mutation(mutation_rate)
+                child1.mutation(adapted_mutation_rate)
+                child2.mutation(adapted_mutation_rate)
                 
                 new_population.append(child1)
                 new_population.append(child2)
