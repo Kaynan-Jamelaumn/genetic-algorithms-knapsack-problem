@@ -5,7 +5,7 @@ from Visualization import *
 from CrossOverMethods import *
 
 class GeneticAlgorithm():
-    def __init__(self, population_size: int, selection_method: str ="roulette", crossover_method:str ="single_point", elitism_chance: float| int = 0.05):
+    def __init__(self, population_size: int, selection_method: str ="roulette", crossover_method:str ="single_point"):
         """
         Initialize the Genetic Algorithm with the given parameters.
         
@@ -21,7 +21,6 @@ class GeneticAlgorithm():
         self.generation = 0  # Current generation number
         self.best_solution = None  # Best solution found so far
         self.solution_list = []  # List to store the best solution scores over generations
-        self.elitsm_chance = elitism_chance  # Percentage of elites to preserve
 
         # Mapping of selection methods to their corresponding functions
         self.selection_methods = {
@@ -129,9 +128,17 @@ class GeneticAlgorithm():
                     self.population[j].chromosome))
         return diversity / (self.population_size * (self.population_size - 1) / 2)
 
+    def calculate_mutation_rate(self, adaptative_mutation : bool = True, mutation_rate : float = 0.5):
+
+        diversity = self.calculate_diversity()
+        if (adaptative_mutation):
+            return mutation_rate * (1 - diversity) # Higher diversity -> Lower mutation
+        else: 
+            return  mutation_rate
 
 
-    def solve(self, mutation_rate, num_generations, spaces, values, space_limit, generate_graphic=True) -> list:
+
+    def solve(self, mutation_rate, num_generations, spaces, values, space_limit, generate_graphic=True, adaptative_mutation: bool = True,  elitism_chance: float| int = 0.05) -> list:
         """
         Run the genetic algorithm to solve the problem.
         
@@ -158,8 +165,7 @@ class GeneticAlgorithm():
         
         for _ in range(num_generations):
              # Calculate diversity and adjust mutation rate
-            diversity = self.calculate_diversity()
-            adapted_mutation_rate = mutation_rate * (1 - diversity)  # Higher diversity -> Lower mutation
+            adapted_mutation_rate = self.calculate_mutation_rate(adaptative_mutation, mutation_rate)
 
 
             total_score = self.sum_avaliation()
@@ -167,7 +173,7 @@ class GeneticAlgorithm():
             new_population = []
 
             # Preserve the top N individuals (Elitism)
-            elite_count = max(1, int(self.elitsm_chance * self.population_size))
+            elite_count = max(1, int(elitism_chance * self.population_size))
             elites = self.population[:elite_count]
             new_population.extend(elites)
 
