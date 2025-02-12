@@ -203,7 +203,7 @@ class GeneticAlgorithm():
         if generate_graphic:
             Visualization.plot_generation_scores(generation_scores, avg_scores)
         
-        return self.best_solution.chromosome, generation_scores
+        return self.best_solution, generation_scores
 
     def execute_standard(self, mutation_rate: float, num_generations: int, spaces :list[float], values :list[float], space_limit :float, adaptative_mutation :bool, elitism_chance :float) -> tuple[list[int], list[float]] :
         """
