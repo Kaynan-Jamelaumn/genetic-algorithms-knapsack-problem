@@ -2,10 +2,10 @@ from random import random, choice, sample
 from math import exp  # Import exp for Boltzmann selection
 
 
-
+from Individual import Individual 
 class SelectionMethods:
     @staticmethod
-    def roulette_selection(population, total_score, *args):
+    def roulette_selection(population: list[Individual], total_score: float, *args: any) -> Individual:
         """
         Roulette wheel selection: Selects individuals based on their fitness proportion.
         
@@ -21,7 +21,7 @@ class SelectionMethods:
         return population[-1]
 
     @staticmethod
-    def tournament_selection(population, k=3):
+    def tournament_selection(population: list[Individual], k: int = 3) -> Individual:
         """
         Tournament selection: Selects the best individual from a random subset of the population.
         
@@ -32,7 +32,7 @@ class SelectionMethods:
         return max(competitors, key=lambda ind: ind.evaluation_score)
 
     @staticmethod
-    def rank_selection(population):
+    def rank_selection(population: list[Individual]) -> Individual:
         """
         Rank selection: Selects individuals based on their rank in the sorted population.
         
@@ -50,7 +50,7 @@ class SelectionMethods:
         return sorted_population[-1]
 
     @staticmethod
-    def truncation_selection(population, percentage=0.5):
+    def truncation_selection(population: list[Individual], percentage: float = 0.5) -> Individual:
         """
         Truncation selection: Selects individuals from the top percentage of the population.
         
@@ -61,7 +61,7 @@ class SelectionMethods:
         return choice(population[:cutoff])
 
     @staticmethod
-    def sus_selection(population, total_score, population_size):
+    def sus_selection(population: list[Individual], total_score: float, population_size: int) -> Individual:
         """
         Stochastic Universal Sampling (SUS): Selects individuals evenly spaced across the population.
         
@@ -83,7 +83,7 @@ class SelectionMethods:
         return choice(selected)
 
     @staticmethod
-    def boltzmann_selection(population, temperature=1.0):
+    def boltzmann_selection(population: list[Individual], temperature: float = 1.0) -> Individual:
         """
         Boltzmann selection: Selects individuals based on their fitness adjusted by a temperature parameter.
         
@@ -103,7 +103,7 @@ class SelectionMethods:
         return population[-1]
 
     @staticmethod
-    def linear_ranking_selection(population):
+    def linear_ranking_selection(population: list[Individual]) -> Individual:
         """
         Linear ranking selection: Selects individuals based on their linearly assigned ranks.
         
@@ -125,7 +125,7 @@ class SelectionMethods:
         return sorted_population[-1]
 
     @staticmethod
-    def exponential_ranking_selection(population, base=1.5):
+    def exponential_ranking_selection(population: list[Individual], base: float = 1.5) -> Individual:
         """
         Exponential ranking selection: Selects individuals based on their exponentially assigned ranks.
         
@@ -148,7 +148,7 @@ class SelectionMethods:
         return sorted_population[-1]
 
     @staticmethod
-    def mu_lambda_selection(population, population_size, mu_ratio=0.5):
+    def mu_lambda_selection(population: list[Individual], population_size: int, mu_ratio: float = 0.5) -> Individual:
         """
         (μ, λ) selection: Selects individuals from the top μ portion of the population.
         
@@ -159,7 +159,7 @@ class SelectionMethods:
         return choice(population[:mu])
 
     @staticmethod
-    def metropolis_hastings_selection(population):
+    def metropolis_hastings_selection(population: list[Individual]) -> Individual:
         """
         Metropolis-Hastings selection: A probabilistic selection method inspired by MCMC.
         
@@ -175,7 +175,7 @@ class SelectionMethods:
         return candidate2 if random() < probability else candidate1
 
     @staticmethod
-    def remainder_stochastic_sampling(population, total_score, population_size):
+    def remainder_stochastic_sampling(population: list[Individual], total_score: float, population_size: int) -> Individual:
         """
         Remainder Stochastic Sampling (RSS): A combination of deterministic and probabilistic selection.
         
@@ -196,7 +196,7 @@ class SelectionMethods:
         return choice(selected)
 
     @staticmethod
-    def steady_state_selection(population, population_size):
+    def steady_state_selection(population: list[Individual], population_size: int) -> Individual:
         """
         Steady-state selection: Selects individuals from the top portion of the population.
         
@@ -205,7 +205,7 @@ class SelectionMethods:
         return choice(population[:int(population_size * 0.2)])
 
     @staticmethod
-    def random_selection(population):
+    def random_selection(population: list[Individual]) -> Individual:
         """
         Random selection: Selects a random individual from the population.
         

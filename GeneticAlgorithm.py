@@ -6,7 +6,7 @@ from CrossOverMethods import *
 from MutationMethods import *
 
 class GeneticAlgorithm():
-    def __init__(self, population_size: int, selection_method: str ="roulette", crossover_method:str ="single_point", mutation_method:str ="bit_flip", standard_execution :bool = False):
+    def __init__(self, population_size: int, selection_method: str = "roulette", crossover_method: str = "single_point", mutation_method: str = "bit_flip", standard_execution: bool = False):
         """
         Initialize the Genetic Algorithm with the given parameters.
         
@@ -15,16 +15,16 @@ class GeneticAlgorithm():
         :param crossover_method: Method used for crossover (default: "single_point").
         :param elitism_chance: Percentage of top individuals to carry over to the next generation (default: 0.05).
         """
-        self.population_size = population_size  # Size of the population
-        self.selection_method = selection_method  # Selection method to use
-        self.crossover_method = crossover_method  # Crossover method to use
-        self.mutation_method = mutation_method # mutation method to use
-        self.standard_execution = standard_execution # Use island model or normal model
-        self.population = []  # List to hold the population of individuals
-        self.generation = 0  # Current generation number
-        self.best_solution = None  # Best solution found so far
-        self.solution_list = []  # List to store the best solution scores over generations
-        self.islands = []  # List of populations for island model
+        self.population_size: int = population_size  # Size of the population
+        self.selection_method: str = selection_method  # Selection method to use
+        self.crossover_method: str = crossover_method  # Crossover method to use
+        self.mutation_method: str = mutation_method # mutation method to use
+        self.standard_execution: bool  = standard_execution # Use island model or normal model
+        self.population: list[Individual] = []  # List to hold the population of individuals
+        self.generation: int = 0  # Current generation number
+        self.best_solution: Individual = None  # Best solution found so far
+        self.solution_list: list[float] = []  # List to store the best solution scores over generations
+        self.islands: list[list[Individual]] = []  # List of populations for island model
 
         # Mapping of selection methods to their corresponding functions
         self.selection_methods = {
@@ -59,7 +59,7 @@ class GeneticAlgorithm():
             "random": MutationMethods.random_mutation,
         }
 
-    def initialize_population(self, spaces, values, space_limit) -> None:
+    def initialize_population(self, spaces: list[float], values: list[float], space_limit: float) -> None:
         """
         Initialize the population with random individuals.
         
@@ -77,7 +77,7 @@ class GeneticAlgorithm():
         """Sort the population based on evaluation scores in descending order."""
         self.population.sort(key=lambda ind: ind.evaluation_score, reverse=True)
 
-    def update_best_individual(self, individual) -> None:
+    def update_best_individual(self, individual: Individual) -> None:
         """
         Update the best solution if the given individual has a better score.
         
@@ -90,7 +90,7 @@ class GeneticAlgorithm():
         """Calculate the total evaluation score of the population."""
         return sum(ind.evaluation_score for ind in self.population)
     
-    def apply_crossover(self, parent1, parent2) -> tuple[Individual, Individual]:
+    def apply_crossover(self, parent1: Individual, parent2: Individual) -> tuple[Individual, Individual]:
         """
         Apply crossover between two parents to produce two children.
         
@@ -102,7 +102,7 @@ class GeneticAlgorithm():
             raise ValueError(f"Invalid crossover method: {self.crossover_method}")
         return self.crossover_methods[self.crossover_method](parent1, parent2)
 
-    def select_parent(self, total_score) -> Individual:
+    def select_parent(self, total_score: float) -> Individual:
         """
         Select a parent based on the chosen selection method.
         
@@ -120,7 +120,7 @@ class GeneticAlgorithm():
         else:
             return method(self.population)
 
-    def apply_mutation(self, individual, mutation_chance):
+    def apply_mutation(self, individual: Individual, mutation_chance: float):
         """
         Apply the specified mutation method to the individual.
         """
@@ -142,7 +142,7 @@ class GeneticAlgorithm():
         best = self.population[0]
         print(f"G:{best.generation} -> Score: {best.evaluation_score} Chromosome: {best.chromosome}")
 
-    def calculate_diversity(self):
+    def calculate_diversity(self) -> float:
         """
         Get the diversity (how individuals are different from each other)
         """
@@ -156,7 +156,7 @@ class GeneticAlgorithm():
         # Normalize diversity by the total number of unique individual pairs (combinations)
         return diversity / (self.population_size * (self.population_size - 1) / 2)
 
-    def calculate_mutation_rate(self, adaptative_mutation : bool = True, mutation_rate : float = 0.5):
+    def calculate_mutation_rate(self, adaptative_mutation : bool = True, mutation_rate : float = 0.5) -> float:
 
         diversity = self.calculate_diversity()
         if (adaptative_mutation):
@@ -166,7 +166,7 @@ class GeneticAlgorithm():
 
 
 
-    def solve(self, mutation_rate, num_generations, spaces, values, space_limit, generate_graphic=True, adaptative_mutation: bool = True, elitism_chance: float | int = 0.05, num_islands: int = 4, migration_interval: int = 5, num_migrants: int = 2) -> list:
+    def solve(self, mutation_rate: float, num_generations: int, spaces: list[float], values: list[float], space_limit: float, generate_graphic: bool = True, adaptative_mutation: bool = True, elitism_chance: float | int = 0.05, num_islands: int = 4, migration_interval: int = 5, num_migrants: int = 2) -> tuple[list[int], list[int]]:
         """
         Run the genetic algorithm to solve an optimization problem, such as the knapsack problem.
 
@@ -205,7 +205,7 @@ class GeneticAlgorithm():
         
         return self.best_solution.chromosome, generation_scores
 
-    def execute_standard(self, mutation_rate, num_generations, spaces, values, space_limit, adaptative_mutation, elitism_chance):
+    def execute_standard(self, mutation_rate: float, num_generations: int, spaces :list[float], values :list[float], space_limit :float, adaptative_mutation :bool, elitism_chance :float) -> tuple[list[int], list[float]] :
         """
         Execute the standard genetic algorithm without island-based evolution.
         
@@ -252,8 +252,8 @@ class GeneticAlgorithm():
         # Return the scores for each generation
         return generation_scores, avg_scores
 
-    def execute_island_model(self, mutation_rate, num_generations, adaptative_mutation, elitism_chance,
-                            num_islands, migration_interval, num_migrants, spaces, values, space_limit):
+    def execute_island_model(self, mutation_rate: float , num_generations: int, adaptative_mutation: bool, elitism_chance: float,
+                            num_islands: int , migration_interval: int, num_migrants: int, spaces: list[float], values: list[float], space_limit: float) -> tuple[list[int], list[float]]:
         """
         Execute the genetic algorithm using an island model approach.
         
@@ -270,7 +270,7 @@ class GeneticAlgorithm():
         :return: A list of best generation scores and average scores per generation.
         """
         self.initialize_and_evaluate(spaces, values, space_limit)
-        
+
         # Split the population into isolated islands
         self.split_into_islands(num_islands)
         self.sort_population()
@@ -310,21 +310,21 @@ class GeneticAlgorithm():
         # Return the scores for each generation
         return generation_scores, avg_scores
 
-    def initialize_and_evaluate(self, spaces, values, space_limit):
+    def initialize_and_evaluate(self, spaces: list[float], values: list[float], space_limit: float) -> None:
         """Initialize the population and evaluate each individual."""
         self.initialize_population(spaces, values, space_limit)
         self.evaluate_population()
 
-    def evaluate_population(self):
+    def evaluate_population(self) -> None:
         """Evaluate all individuals in the current population."""
         for individual in self.population:
             individual.evaluate()
 
-    def sort_population(self):
+    def sort_population(self) -> None:
         """Sort the population based on evaluation scores."""
         self.population.sort(key=lambda x: x.evaluation_score, reverse=True)
 
-    def generate_new_population(self, current_population, total_score, mutation_rate, elitism_chance):
+    def generate_new_population(self, current_population: int, total_score: float, mutation_rate: float, elitism_chance: float) -> list[int]:
         """Generate a new population through elitism, selection, crossover, and mutation."""
         # **Elitism:** Select the top-performing individuals to carry over.
         elite_count = max(1, int(elitism_chance * len(current_population)))
@@ -349,7 +349,7 @@ class GeneticAlgorithm():
 
         return new_population
 
-    def evolve_island(self, island, mutation_rate, adaptative_mutation, elitism_chance):
+    def evolve_island(self, island: int, mutation_rate: float, adaptative_mutation: bool, elitism_chance: float):
         """
         Evolves an island's population for one generation.
 
@@ -382,7 +382,7 @@ class GeneticAlgorithm():
         self.population = original_population  # Restore original population
         return evolved_island
 
-    def split_into_islands(self, num_islands):
+    def split_into_islands(self, num_islands: int) -> None:
         """
         Splits the main population into multiple islands (sub-populations).
 
@@ -397,7 +397,7 @@ class GeneticAlgorithm():
                 end = self.population_size
             self.islands.append(self.population[start:end])  # Append the slice of the population corresponding to the current island to the islands list
 
-    def perform_migration(self, num_migrants):
+    def perform_migration(self, num_migrants: int) -> None:
         """
         Performs migration of individuals between islands to introduce genetic diversity.
 
@@ -421,7 +421,7 @@ class GeneticAlgorithm():
                 self.islands[dest_idx][idx] = migrant  # Replace with migrant
                 self.islands[dest_idx][idx].evaluate()  # Re-evaluate the replaced individual
 
-    def update_best_individual(self, candidate):
+    def update_best_individual(self, candidate: Individual) -> None:
         """
         Updates the best solution found so far if the candidate is better.
 
@@ -430,7 +430,7 @@ class GeneticAlgorithm():
         if candidate.evaluation_score > self.best_solution.evaluation_score:
             self.best_solution = candidate
 
-    def update_final_island_best(self):
+    def update_final_island_best(self) -> None:
         """
         After all generations, updates the best solution by considering all islands.
         """

@@ -1,7 +1,7 @@
 import itertools  # Import itertools for generating combinations
 
 class Knapsack:
-    def __init__(self, volume_limit):
+    def __init__(self, volume_limit: float):
         """
         Initialize the Knapsack with a volume limit.
         

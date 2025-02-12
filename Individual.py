@@ -19,7 +19,7 @@ class Individual:
         self.chromosome = []  # Binary chromosome representing the solution
         self.space_value = []  # List of tuples (space, price) for selected items
 
-    def generate_chromosome(self) -> list:
+    def generate_chromosome(self) ->  list[int]:
         """
         Generate a random binary chromosome for the individual.
         
@@ -154,7 +154,7 @@ class Individual:
         
         return child1, child2
 
-    def bit_flip(self, mutation_chance: float):
+    def bit_flip(self, mutation_chance: float) -> None:
         """
         Perform mutation on the individual's chromosome.
         
@@ -163,7 +163,7 @@ class Individual:
         # Flip genes with a probability of `mutation_chance`
         self.chromosome = [gene ^ 1 if random() < mutation_chance else gene for gene in self.chromosome]
 
-    def swap_mutation(self):
+    def swap_mutation(self) -> None:
         """
         Perform swap mutation by swapping two distinct genes in the chromosome.
         """
@@ -171,7 +171,7 @@ class Individual:
             idx1, idx2 = sample(range(len(self.chromosome)), 2)
             self.chromosome[idx1], self.chromosome[idx2] = self.chromosome[idx2], self.chromosome[idx1]
 
-    def scramble_mutation(self):
+    def scramble_mutation(self) -> None:
         """
         Perform scramble mutation by shuffling a random subsection of the chromosome.
         """

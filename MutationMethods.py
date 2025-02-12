@@ -1,30 +1,30 @@
 import random
-
+from Individual import Individual
 
 class MutationMethods:
     @staticmethod
-    def bit_flip(individual, mutation_chance):
+    def bit_flip(individual: Individual, mutation_chance: float) -> None:
         """
         Perform bit-flip mutation on an individual's chromosome.
         """
         individual.bit_flip(mutation_chance)
 
     @staticmethod
-    def swap_mutation(individual):
+    def swap_mutation(individual: Individual) -> None:
         """
         Perform swap mutation by swapping two genes in the chromosome.
         """
         individual.swap_mutation()
 
     @staticmethod
-    def scramble_mutation(individual):
+    def scramble_mutation(individual: Individual) -> None:
         """
         Perform scramble mutation by shuffling a subsection of the chromosome.
         """
         individual.scramble_mutation()
 
     @staticmethod
-    def random_mutation(individual, mutation_chance):
+    def random_mutation(individual: Individual, mutation_chance: float) -> None:
         """
         Apply a random mutation method to the individual.
         """
