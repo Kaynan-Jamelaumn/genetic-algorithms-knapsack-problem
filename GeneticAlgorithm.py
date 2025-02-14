@@ -134,7 +134,7 @@ class GeneticAlgorithm():
             raise ValueError(f"Invalid crossover method: {self.crossover_method}")
         return self.crossover_methods[self.crossover_method](parent1, parent2)
 
-    def select_parent(self, total_score: float) -> Individual:
+    def select_parent(self, total_score: float, population: list[Individual] = None) -> Individual:
         """
         Select a parent based on the chosen selection method.
         
@@ -178,13 +178,15 @@ class GeneticAlgorithm():
         best = self.population[0]
         print(f"G:{best.generation} -> Score: {best.evaluation_score} Chromosome: {best.chromosome}")
 
-    def calculate_diversity(self) -> float:
+    def calculate_diversity(self, population: list[Individual] = None) -> float:
         """
         Get the diversity (how individuals are different from each other)
         """
         if population is None:
             population = self.population
         pop_size = len(population)
+        if pop_size < 2:
+             return 0
         diversity = 0
         for i in range(len(self.population)):
             for j in range(i+1, len(self.population)):# Start from i+1 to avoid double counting

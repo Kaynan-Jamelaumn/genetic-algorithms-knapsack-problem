@@ -1,6 +1,7 @@
 from GeneticAlgorithm import GeneticAlgorithm
 from Product import Product
 from random import seed
+
 # Seed for reproducibility
 #seed(42)
 
@@ -38,13 +39,43 @@ population_size = 200
 mutation_rate = 0.34
 num_generations = 80
 total_space = 10  # Knapsack capacity
-selection_method = "roulette"  # Can be changed to other methods
-crossover_method = "single_point"  # Can be changed to other methods
+selection_method = "roulette"
+crossover_method = "single_point"
 mutation_method = "swap_mutation"
+migration_method = "star_migration_bidirectional"
+primary_replacement_method = "best"
+secundary_replacement_method = "random"
+standard_execution = False  # Use island model or normal model (False = use island model)
+num_islands = 4
+migration_interval = 5
+num_migrants = 2
 
-# Initialize and run the genetic algorithm
-ga = GeneticAlgorithm(population_size, selection_method, crossover_method)
-best_solution, generation_scores  = ga.solve(mutation_rate, num_generations, spaces, prices, total_space)
+# Initialize the genetic algorithm with all possible parameters
+ga = GeneticAlgorithm(
+    population_size,
+    selection_method,
+    crossover_method,
+    mutation_method,
+    standard_execution,
+    migration_method,
+    primary_replacement_method,
+    secundary_replacement_method
+)
+
+# Run the genetic algorithm with all possible parameters
+best_solution, generation_scores = ga.solve(
+    mutation_rate,
+    num_generations,
+    spaces,
+    prices,
+    total_space,
+    generate_graphic=True,
+    adaptative_mutation=True,
+    elitism_chance=0.05,
+    num_islands=num_islands,
+    migration_interval=migration_interval,
+    num_migrants=num_migrants
+)
 
 # Visualize the final best solution
 selected_products = [products[i].name for i, gene in enumerate(best_solution) if gene == 1]

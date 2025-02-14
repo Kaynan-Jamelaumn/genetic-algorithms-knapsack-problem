@@ -1,6 +1,24 @@
+## Table of Contents 📚
+
+1. [Introduction](#genetic-algorithm-🚀)
+2. [Class `GeneticAlgorithm`](#class-geneticalgorithm)
+   - [Method `__init__`](#method-__init__)
+   - [Selection Methods 🧩](#selection-methods-🧩)
+   - [Crossover Methods 🔄](#crossover-methods-🔄)
+   - [Mutation Methods ⚙️](#mutation-methods-⚙️)
+   - [Migration Methods 🌍](#migration-methods-🌍)
+   - [Replacement Methods ♻️](#replacement-methods-♻️)
+3. [Island Models in Genetic Algorithms 🌐](#island-models-in-genetic-algorithms-🌐)
+   - [Migration Process 🚛](#migration-process-🚛)
+   - [Migration Methods 🔀](#migration-methods-🔀)
+   - [Replacement Methods ♻️](#replacement-methods-♻️)
+4. [Example Usage 💻](#example-usage)
+
+
 # Genetic Algorithm
 
 This project implements a genetic algorithm to solve optimization problems, such as the knapsack problem. The `GeneticAlgorithm` class is configurable with different selection, crossover, and mutation methods, and supports both standard execution and the island model.
+
 
 ## Class `GeneticAlgorithm`
 
@@ -35,7 +53,7 @@ Initializes the genetic algorithm with the provided parameters.
 - **solution_list** (`list[float]`): A list of the best solution scores over generations.
 - **islands** (`list[list[Individual]]`): A list of populations for the island model.
 
-#### Selection Methods:
+####  Selection Methods 🧩
 - `"roulette"`: Roulette wheel selection.
 - `"tournament"`: Tournament selection.
 - `"rank"`: Rank selection.
@@ -50,26 +68,27 @@ Initializes the genetic algorithm with the provided parameters.
 - `"metropolis_hastings"`: Metropolis-Hastings selection.
 - `"rss"`: Remainder stochastic sampling.
 
-#### Crossover Methods:
+#### Crossover Methods 🔄
 - `"single_point"`: Single-point crossover.
 - `"uniform"`: Uniform crossover.
 - `"two_point"`: Two-point crossover.
 - `"arithmetic"`: Arithmetic crossover.
 - `"half_uniform"`: Half-uniform crossover.
 
-#### Mutation Methods:
+#### Mutation Methods ⚙️
 - `"bit_flip"`: Bit-flip mutation.
 - `"swap_mutation"`: Swap mutation.
 - `"scramble_mutation"`: Scramble mutation.
 - `"random"`: Random mutation.
 
-#### Migration Methods:
+####  Migration Methods 🌍
 - `"ring"`: Migrants are sent to the next island in a ring-like fashion.
 - `"random"`: Randomly selects individuals and migrate them between islands.
-- `"adaptive_migration"`: Randomly selects individuals and migrate them between islands.
-- `"star_migration_bidirectional"`: Randomly selects individuals and migrate them between islands.
-- `"star_migration_unidirectional"`: Randomly selects individuals and migrate them between islands.
-#### Replacement Methods:
+- `"adaptive_migration"`: Adjusts migration based on population diversity.
+- `"star_migration_bidirectional"`: Mixes indivuals into a central island and redistributes them to all island.
+- `"star_migration_unidirectional"`: two-way migration between a central hub island and spoke islands.
+
+#### Replacement Methods ♻️
 - `"random"`: Randomly selects individuals for replacement.
 - `"best"`: Selects the best individuals for replacement.
 - `"worst"`: Selects the worst individuals for replacement.
@@ -96,11 +115,6 @@ Executes the genetic algorithm to solve an optimization problem, such as the kna
 #### Return:
 - **tuple[Individual, list[int]]**: A tuple containing the Individual of the best solution and the list of scores over generations.
 
-#### Example Usage:
-```python
-ga = GeneticAlgorithm(population_size=100, selection_method="tournament", crossover_method="uniform", mutation_method="bit_flip")
-best_solution, generation_scores = ga.solve(mutation_rate=0.01, num_generations=50, spaces=[1, 2, 3], values=[10, 20, 30], space_limit=5)
-```
 # Genetic Algorithm Selection Methods
 
 This table compares different selection methods used in Genetic Algorithms based on their exploration (diversity), exploitation (focus on the best individuals), and best use cases.
@@ -316,7 +330,7 @@ Mutation is a key genetic algorithm (GA) operation that helps maintain diversity
 | **Scramble Mutation**  | Randomly shuffles a portion of the chromosome | Permutation-based problems |
 
 
-## Island Models in Genetic Algorithms
+## Island Models in Genetic Algorithms 🌐
 
 Island models are a variation of the standard genetic algorithm where the population is divided into sub-populations (or islands). Each island evolves independently using its own genetic algorithm, and periodically, individuals from different islands migrate to exchange genetic information. This process is intended to introduce diversity into the population, potentially preventing premature convergence to suboptimal solutions and allowing the algorithm to explore different regions of the solution space simultaneously.
 
@@ -345,7 +359,56 @@ Migration is the process of transferring individuals between islands. The freque
 - **Star Migration (Bidirectional):** A central hub island exchanges individuals with all other islands, promoting two-way genetic exchange.
 
 
-### Replacement Methods
+### Migration Methods 🔀
+
+#### **1. Ring Migration**
+- **Description:** Migrates individuals in a circular pattern between islands.
+- **Steps:**
+  1. Select the top `num_migrants` individuals from each island using the primary replacement method.
+  2. Migrate these individuals to the next island in a circular order.
+  3. Replace individuals in the destination island using the secondary replacement method.
+  4. Re-evaluate the updated individuals.
+- **Best for:** Introducing gradual diversity while preserving local adaptations.
+
+#### **2. Random Migration**
+- **Description:** Migrates individuals randomly between islands to maximize diversity.
+- **Steps:**
+  1. Select random individuals from each island using the primary replacement method.
+  2. Migrate individuals to randomly chosen destination islands.
+  3. Replace individuals in the destination islands using the secondary replacement method.
+  4. Re-evaluate the updated individuals.
+- **Best for:** Promoting randomness and diversity across populations.
+
+#### **3. Adaptive Migration**
+- **Description:** Adjusts the number of migrants based on the genetic diversity of each island.
+- **Steps:**
+  1. Calculate the genetic diversity for each island.
+  2. Determine the number of migrants adaptively based on diversity.
+  3. Migrate individuals to the next island in a circular order.
+  4. Replace individuals in the destination island using the secondary replacement method.
+  5. Re-evaluate the updated individuals.
+- **Best for:** Dynamically balancing diversity in heterogeneous populations.
+
+#### **4. Unidirectional Star Migration**
+- **Description:** Migrates individuals to a central hub for mixing and redistributes them to all islands.
+- **Steps:**
+  1. Collect migrants from each island into a central hub.
+  2. Mix the migrants in the hub to ensure diversity.
+  3. Redistribute migrants back to all islands.
+  4. Replace individuals in each island and re-evaluate them.
+- **Best for:** Centralized diversity control.
+
+#### **5. Bidirectional Star Migration**
+- **Description:** Facilitates two-way migration between a central hub island and spoke islands.
+- **Steps:**
+  1. Select migrants from the hub and send them to spoke islands.
+  2. Select migrants from spoke islands and send them back to the hub.
+  3. Replace individuals in both the hub and spoke islands.
+  4. Re-evaluate the updated individuals.
+- **Best for:** Centralized genetic exchange while maintaining local adaptations.
+
+
+### Replacement Methods ♻️
 
 The replacement methods are used in the **island model** to determine which individuals in a population (island) will be replaced during migration. These methods ensure that the population evolves effectively by replacing individuals based on specific criteria.
 
@@ -366,3 +429,107 @@ The replacement methods are used in the **island model** to determine which indi
 - When migration occurs, individuals are selected from one island to replace individuals in another island.
 - The `primary_replacement_method` determines which individuals are chosen for migration.
 - The `secundary_replacement_method` determines which individuals in the destination island are replaced.
+- 
+
+
+# Example Usage 💻
+
+## Setting Up the Genetic Algorithm
+
+```python
+from GeneticAlgorithm import GeneticAlgorithm
+from Product import Product
+from random import seed
+
+# Seed for reproducibility
+#seed(42)
+
+# List of products
+products = [
+    Product("Rice", 1.11, 4.75),
+    Product("Beans", 1.25, 8.00),
+    Product("Wheat Flour", 1.67, 5.50),
+    Product("Sugar", 1.25, 3.50),
+    Product("Salt", 0.46, 1.50),
+    Product("Cooking Oil", 0.90, 4.50),
+    Product("Coffee", 1.39, 16.00),
+    Product("Milk", 1.00, 3.75),
+    Product("Butter", 0.54, 11.50),
+    Product("Bread", 1.75, 10.00),
+    Product("Pasta", 1.33, 7.50),
+    Product("Canned Goods", 0.33, 6.00),
+    Product("Soap", 0.22, 3.00),
+    Product("Toilet Paper", 3.24, 4.50),
+    Product("Shampoo", 0.85, 6.75),
+    Product("Eggs", 2.50, 5.00),
+    Product("Cheese", 0.48, 12.00),
+    Product("Chicken", 3.00, 15.00),
+    Product("Apples", 2.00, 4.00),
+    Product("Bananas", 1.20, 3.00),
+    Product("Juice", 1.75, 8.50),
+]
+
+# Extracting spaces and prices from products
+spaces = [product.volume for product in products]
+prices = [product.price for product in products]
+
+# Genetic Algorithm parameters
+population_size = 200
+mutation_rate = 0.34
+num_generations = 80
+total_space = 10  # Knapsack capacity
+selection_method = "roulette"
+crossover_method = "single_point"
+mutation_method = "swap_mutation"
+migration_method = "star_migration_bidirectional"
+primary_replacement_method = "best"
+secundary_replacement_method = "random"
+standard_execution = False  # Use island model or normal model (False = use island model)
+num_islands = 4
+migration_interval = 5
+num_migrants = 2
+
+# Initialize the genetic algorithm with all possible parameters
+ga = GeneticAlgorithm(
+    population_size,
+    selection_method,
+    crossover_method,
+    mutation_method,
+    standard_execution,
+    migration_method,
+    primary_replacement_method,
+    secundary_replacement_method
+)
+
+# Run the genetic algorithm with all possible parameters
+best_solution, generation_scores = ga.solve(
+    mutation_rate,
+    num_generations,
+    spaces,
+    prices,
+    total_space,
+    generate_graphic=True,
+    adaptative_mutation=True,
+    elitism_chance=0.05,
+    num_islands=num_islands,
+    migration_interval=migration_interval,
+    num_migrants=num_migrants
+)
+
+# Visualize the final best solution
+selected_products = [products[i].name for i, gene in enumerate(best_solution) if gene == 1]
+selected_spaces = [products[i].volume for i, gene in enumerate(best_solution) if gene == 1]
+selected_prices = [products[i].price for i, gene in enumerate(best_solution) if gene == 1]
+
+print("\nSelected Products in the Best Solution:")
+for product, space, price in zip(selected_products, selected_spaces, selected_prices):
+    print(f"{product}: Space = {space}, Price = {price}")
+
+print(f"\nTotal Space Used: {sum(selected_spaces)}")
+print(f"Total Price: {sum(selected_prices)}")
+
+print("\nFinal Best Solution:")
+print(f"Chromosome: {best_solution}")
+
+```
+
