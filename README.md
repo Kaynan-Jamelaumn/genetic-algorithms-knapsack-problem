@@ -333,11 +333,11 @@ Island models are a variation of the standard genetic algorithm where the popula
 
 ### Migration Process
 
-Migration is the process of transferring individuals between islands. The frequency and the number of individuals migrating can be configured, and there are different strategies for selecting which individuals will migrate, but currently this project only uses the ring migration:
+Migration is the process of transferring individuals between islands. The frequency and the number of individuals migrating can be configured, and there are different strategies for selecting which individuals will migrate:
 
-- **Interval-based Migration:** Individuals migrate after a fixed number of generations.
-- **Random Migration:** Random individuals are selected for migration.
-- **Best Individual Migration:** The best individual from one island is selected to migrate to another island.
+- **Ring Migration:** Individuals migrate in a circular pattern between islands, ensuring a structured flow of genetic material..
+- **Random Migration:** Individuals migrate to randomly selected islands instead of following a fixed pattern, increasing genetic diversity.
+- **Adaptive Migration:** The number of migrating individuals is dynamically adjusted based on the genetic diversity of each island, balancing exploration and exploitation.
 
 
 ### Replacement Methods

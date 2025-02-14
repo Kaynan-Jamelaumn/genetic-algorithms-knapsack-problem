@@ -16,7 +16,7 @@ class GeneticAlgorithm():
         crossover_method: str = "single_point", 
         mutation_method: str = "bit_flip", 
         standard_execution: bool = False, 
-        migration_method: str = "ring_migration", 
+        migration_method: str = "adaptive_migration", 
         primary_replacement_method: str = "best", 
         secundary_replacement_method: str = "random"):
         """
@@ -77,6 +77,7 @@ class GeneticAlgorithm():
         self.migration_methods = {
             "ring_migration": MigrationMethods.ring_migration,
             "random_migration": MigrationMethods.random_migration,
+            "adaptive_migration": MigrationMethods.adaptive_migration,
         }
 
         self.replacement_methods = {
