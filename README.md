@@ -15,6 +15,7 @@ Initializes the genetic algorithm with the provided parameters.
 - **selection_method** (`str`, optional): The parent selection method. Default: `"roulette"`.
 - **crossover_method** (`str`, optional): The crossover method. Default: `"single_point"`.
 - **mutation_method** (`str`, optional): The mutation method. Default: `"bit_flip"`.
+- **migration_method** (`str`, optional): The migration method. Default: `"ring_migration"`.
 - **primary_replacement_method** (`str`, optional): The method used to select individuals for replacement in the island model. Default: `"best"`.
 - **secundary_replacement_method** (`str`, optional): The secondary method used to select individuals for replacement in the island model. Default: `"random"`.
 - **standard_execution** (`bool`, optional): Determines if the algorithm will run in the standard model or the island model. Default: `False`.
@@ -24,6 +25,7 @@ Initializes the genetic algorithm with the provided parameters.
 - **selection_method** (`str`): The selection method used.
 - **crossover_method** (`str`): The crossover method used.
 - **mutation_method** (`str`): The mutation method used.
+- **migration_method** (`str`): The migration method used.
 - **primary_replacement_method** (`str`): The primary replacement method for the island model.
 - **secundary_replacement_method** (`str`): The secondary replacement method for the island model.
 - **standard_execution** (`bool`): Indicates if the island model will be used.
@@ -327,7 +329,7 @@ Island models are a variation of the standard genetic algorithm where the popula
 
 ### Migration Process
 
-Migration is the process of transferring individuals between islands. The frequency and the number of individuals migrating can be configured, and there are different strategies for selecting which individuals will migrate, but currently this project only uses the best Individual migration strategy with random replacement:
+Migration is the process of transferring individuals between islands. The frequency and the number of individuals migrating can be configured, and there are different strategies for selecting which individuals will migrate, but currently this project only uses the ring migration:
 
 - **Interval-based Migration:** Individuals migrate after a fixed number of generations.
 - **Random Migration:** Random individuals are selected for migration.

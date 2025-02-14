@@ -1,11 +1,46 @@
 from Individual import Individual
-class CrossoverMethods:
+from ReplacementMethods import *
+from typing import Callable
+
+class MigrationMethods:
     @staticmethod
-    def single_point_crossover(num_migrants: int, islands: list[list[Individual]]) -> None:
-        pass
+    def ring_migration(islands: list[list[Individual]], num_migrants: int, replacement_methods: dict[str, Callable[[list["Individual"], int], int | list[int]]], primary_replacement_method: str = "best", secondary_replacement_method: str = "random") -> None:
+        """
+        Performs migration of individuals between islands to introduce genetic diversity.
+
+        Steps:
+        1. Selects the top num_migrants individuals from each island.
+        2. Migrates individuals to the next island in a circular pattern.
+        3. Replaces random individuals in the destination island with migrants.
+        4. Evaluates the updated population.
+
+        :param num_migrants: The number of individuals to migrate per island.
+        """
+        migrants = []
+        for island in islands:
+            # Use the best_individual_replacement method to select the top migrants
+            migrant_indexes = MigrationMethods.apply_replacement_method(replacement_methods, primary_replacement_method, island, num_migrants)
+            # Retrieve the actual migrants using the indexes
+            migrants.append([island[idx] for idx in migrant_indexes])
+
+        for i in range(len(islands)):
+            dest_idx = (i + 1) % len(islands)  # Determine the target island
+            for migrant in migrants[i]:
+                idx = MigrationMethods.apply_replacement_method(replacement_methods, secondary_replacement_method, islands[dest_idx], 1)  # Replace one individual at a time
+                if isinstance(idx, list):
+                    idx = idx[0]  # If a list is returned, take the first index
+                islands[dest_idx][idx] = migrant  # Replace with migrant
+                islands[dest_idx][idx].evaluate()  # Re-evaluate the replaced individual
 
     @staticmethod
-    def uniform_crossover(parent1: Individual , parent2: Individual) -> tuple[Individual, Individual]:
-        return parent1.uniform_crossover(parent2)
-
-  
+    def apply_replacement_method(
+        replacement_methods: dict[str, Callable[[list["Individual"], int], int | list[int]]],
+        replacement_target: str, island: list[Individual],
+        num_migrants: int = None) -> int | list[int]:
+        """
+        Apply the specified replacement method to the individual.
+        """
+        if replacement_target not in replacement_methods:
+            raise ValueError(f"Invalid replacement method: {replacement_target}")
+        replacement_function = replacement_methods[replacement_target]
+        return replacement_function(island, num_migrants)

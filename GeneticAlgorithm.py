@@ -5,9 +5,20 @@ from Visualization import *
 from CrossOverMethods import *
 from MutationMethods import *
 from ReplacementMethods import *
+from MigrationMethods import *
+
+from typing import Callable
 
 class GeneticAlgorithm():
-    def __init__(self, population_size: int, selection_method: str = "roulette", crossover_method: str = "single_point", mutation_method: str = "bit_flip", standard_execution: bool = False,  primary_replacement_method: str = "best", secundary_replacement_method: str = "random"):
+    def __init__(self, 
+        population_size: int, 
+        selection_method: str = "roulette", 
+        crossover_method: str = "single_point", 
+        mutation_method: str = "bit_flip", 
+        standard_execution: bool = False, 
+        migration_method: str = "ring_migration", 
+        primary_replacement_method: str = "best", 
+        secundary_replacement_method: str = "random"):
         """
         Initialize the Genetic Algorithm with the given parameters.
         
@@ -20,6 +31,7 @@ class GeneticAlgorithm():
         self.selection_method: str = selection_method  # Selection method to use
         self.crossover_method: str = crossover_method  # Crossover method to use
         self.mutation_method: str = mutation_method # mutation method to use
+        self.migration_method: str = migration_method # migration method to use
         self.primary_replacement_method: str = primary_replacement_method # The primary individual to migrate 
         self.secundary_replacement_method: str = secundary_replacement_method # The secundary individual to migrate 
         self.standard_execution: bool  = standard_execution # Use island model or normal model
@@ -63,7 +75,7 @@ class GeneticAlgorithm():
         }
 
         self.migration_methods = {
-            "random": "random",
+            "ring_migration": MigrationMethods.ring_migration,
         }
 
         self.replacement_methods = {
@@ -180,7 +192,18 @@ class GeneticAlgorithm():
 
 
 
-    def solve(self, mutation_rate: float, num_generations: int, spaces: list[float], values: list[float], space_limit: float, generate_graphic: bool = True, adaptative_mutation: bool = True, elitism_chance: float | int = 0.05, num_islands: int = 4, migration_interval: int = 5, num_migrants: int = 2) -> tuple[list[int], list[int]]:
+    def solve(self, 
+              mutation_rate: float, 
+              num_generations: int, 
+              spaces: list[float], 
+              values: list[float], 
+              space_limit: float, 
+              generate_graphic: bool = True, 
+              adaptative_mutation: bool = True, 
+              elitism_chance: float | int = 0.05, 
+              num_islands: int = 4, 
+              migration_interval: int = 5, 
+              num_migrants: int = 2) -> tuple[list[int], list[int]]:
         """
         Run the genetic algorithm to solve an optimization problem, such as the knapsack problem.
 
@@ -219,7 +242,14 @@ class GeneticAlgorithm():
         
         return self.best_solution, generation_scores
 
-    def execute_standard(self, mutation_rate: float, num_generations: int, spaces :list[float], values :list[float], space_limit :float, adaptative_mutation :bool, elitism_chance :float) -> tuple[list[int], list[float]] :
+    def execute_standard(self, 
+                        mutation_rate: float,
+                        num_generations: int,
+                        spaces :list[float],
+                        values :list[float],
+                        space_limit :float,
+                        adaptative_mutation :bool,
+                        elitism_chance :float) -> tuple[list[int], list[float]] :
         """
         Execute the standard genetic algorithm without island-based evolution.
         
@@ -266,8 +296,17 @@ class GeneticAlgorithm():
         # Return the scores for each generation
         return generation_scores, avg_scores
 
-    def execute_island_model(self, mutation_rate: float , num_generations: int, adaptative_mutation: bool, elitism_chance: float,
-                            num_islands: int , migration_interval: int, num_migrants: int, spaces: list[float], values: list[float], space_limit: float) -> tuple[list[int], list[float]]:
+    def execute_island_model(self, 
+                            mutation_rate: float,
+                            num_generations: int,
+                            adaptative_mutation: bool,
+                            elitism_chance: float,
+                            num_islands: int,
+                            migration_interval: int,
+                            num_migrants: int,
+                            spaces: list[float],
+                            values: list[float],
+                            space_limit: float) -> tuple[list[int], list[float]]:
         """
         Execute the genetic algorithm using an island model approach.
         
@@ -308,7 +347,7 @@ class GeneticAlgorithm():
 
             # Perform migration between islands at the specified interval
             if (gen + 1) % migration_interval == 0:
-                self.perform_migration(num_migrants)
+                self.apply_migration_method(num_migrants)
 
             # Track the best score of the generation from all islands
             current_gen_best = max(island[0].evaluation_score for island in self.islands)
@@ -411,32 +450,6 @@ class GeneticAlgorithm():
                 end = self.population_size
             self.islands.append(self.population[start:end])  # Append the slice of the population corresponding to the current island to the islands list
 
-    def perform_migration(self, num_migrants: int) -> None: #ring_elitist_random_replacement
-        """
-        Performs migration of individuals between islands to introduce genetic diversity.
-
-        Steps:
-        1. Selects the top `num_migrants` individuals from each island.
-        2. Migrates individuals to the next island in a circular pattern.
-        3. Replaces random individuals in the destination island with migrants.
-        4. Evaluates the updated population.
-
-        :param num_migrants: The number of individuals to migrate per island.
-        """
-        migrants = []
-        for island in self.islands:
-             # Use the best_individual_replacement method to select the top migrants
-            migrant_indexes = self.apply_replacement_method(self.primary_replacement_method, island, num_migrants)
-            # Retrieve the actual migrants using the indexes
-            migrants.append([island[idx] for idx in migrant_indexes])
-
-        for i in range(len(self.islands)):
-            dest_idx = (i + 1) % len(self.islands)  # Determine the target island
-            for migrant in migrants[i]:
-                idx = self.apply_replacement_method(self.secundary_replacement_method, self.islands[dest_idx]) 
-                self.islands[dest_idx][idx] = migrant  # Replace with migrant
-                self.islands[dest_idx][idx].evaluate()  # Re-evaluate the replaced individual
-
     def update_best_individual(self, candidate: Individual) -> None:
         """
         Updates the best solution found so far if the candidate is better.
@@ -456,11 +469,12 @@ class GeneticAlgorithm():
         self.solution_list.append(self.best_solution.evaluation_score)  # Store the best solution score
 
 
-    def apply_replacement_method(self, migrate_target: str,  island: list[Individual], num_migrants: int = None) -> int:
+
+    def apply_migration_method(self, num_migrants: int) -> None:
         """
-        Apply the specified mutation method to the individual.
+        Apply the specified migration method to the island model.
         """
-        if migrate_target not in self.replacement_methods:
-            raise ValueError(f"Invalid replacement method: {migrate_target}")
-        replacement_function = self.replacement_methods[migrate_target]
-        return replacement_function(island, num_migrants)
+        if self.migration_method not in self.migration_methods:
+            raise ValueError(f"Invalid replacement method: {self.migration_method}")
+        migration_function = self.migration_methods[self.migration_method]
+        migration_function(self.islands, num_migrants, self.replacement_methods, self.primary_replacement_method, self.secundary_replacement_method)
