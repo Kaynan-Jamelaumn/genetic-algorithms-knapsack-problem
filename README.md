@@ -63,6 +63,10 @@ Initializes the genetic algorithm with the provided parameters.
 - `"scramble_mutation"`: Scramble mutation.
 - `"random"`: Random mutation.
 
+#### Migration Methods:
+- `"ring"`: Migrants are sent to the next island in a ring-like fashion.
+- `"random"`: Randomly selects individuals and migrate them between islands.
+
 #### Replacement Methods:
 - `"random"`: Randomly selects individuals for replacement.
 - `"best"`: Selects the best individuals for replacement.

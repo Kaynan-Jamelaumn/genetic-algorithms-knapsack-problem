@@ -76,6 +76,7 @@ class GeneticAlgorithm():
 
         self.migration_methods = {
             "ring_migration": MigrationMethods.ring_migration,
+            "random_migration": MigrationMethods.random_migration,
         }
 
         self.replacement_methods = {

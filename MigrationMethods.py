@@ -33,6 +33,36 @@ class MigrationMethods:
                 islands[dest_idx][idx].evaluate()  # Re-evaluate the replaced individual
 
     @staticmethod
+    def random_migration(islands: list[list[Individual]], num_migrants: int, replacement_methods: dict[str, Callable[[list["Individual"], int], int | list[int]]], primary_replacement_method: str = "random", secondary_replacement_method: str = "random") -> None:
+        """
+        Performs random migration of individuals between islands to introduce genetic diversity.
+
+        Steps:
+        1. Selects random individuals from each island.
+        2. Migrates individuals to a randomly chosen island.
+        3. Replaces random individuals in the destination island with migrants.
+        4. Evaluates the updated population.
+
+        :param num_migrants: The number of individuals to migrate per island.
+        """
+        migrants = []
+        for island in islands:
+            # Use the random_individual_replacement method to select random migrants
+            migrant_indexes = MigrationMethods.apply_replacement_method(replacement_methods, primary_replacement_method, island, num_migrants)
+            # Retrieve the actual migrants using the indexes
+            migrants.append([island[idx] for idx in migrant_indexes])
+
+        for i in range(len(islands)):
+            for migrant in migrants[i]:
+                dest_idx = random.randint(0, len(islands) - 1)  # Randomly choose a destination island
+                idx = MigrationMethods.apply_replacement_method(replacement_methods, secondary_replacement_method, islands[dest_idx], 1)  # Replace one individual at a time
+                if isinstance(idx, list):
+                    idx = idx[0]  # If a list is returned, take the first index
+                islands[dest_idx][idx] = migrant  # Replace with migrant
+                islands[dest_idx][idx].evaluate()  # Re-evaluate the replaced individual
+
+
+    @staticmethod
     def apply_replacement_method(
         replacement_methods: dict[str, Callable[[list["Individual"], int], int | list[int]]],
         replacement_target: str, island: list[Individual],
