@@ -1,22 +1,22 @@
 import itertools
 
 class Product:
-    def __init__(self, name, volume, price):
-        self._name = name
-        self._volume = volume
-        self._price = price
+    def __init__(self, name: str, volume: float, price: float) -> None:
+        self._name: str = name
+        self._volume: float = volume
+        self._price: float = price
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def volume(self):
+    def volume(self) -> float:
         return self._volume
 
     @property
-    def price(self):
+    def price(self) -> float:
         return self._price
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Product(name='{self._name}', volume={self._volume}, price={self._price})"
