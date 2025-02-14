@@ -15,6 +15,8 @@ Initializes the genetic algorithm with the provided parameters.
 - **selection_method** (`str`, optional): The parent selection method. Default: `"roulette"`.
 - **crossover_method** (`str`, optional): The crossover method. Default: `"single_point"`.
 - **mutation_method** (`str`, optional): The mutation method. Default: `"bit_flip"`.
+- **primary_replacement_method** (`str`, optional): The method used to select individuals for replacement in the island model. Default: `"best"`.
+- **secundary_replacement_method** (`str`, optional): The secondary method used to select individuals for replacement in the island model. Default: `"random"`.
 - **standard_execution** (`bool`, optional): Determines if the algorithm will run in the standard model or the island model. Default: `False`.
 
 #### Attributes:
@@ -22,6 +24,8 @@ Initializes the genetic algorithm with the provided parameters.
 - **selection_method** (`str`): The selection method used.
 - **crossover_method** (`str`): The crossover method used.
 - **mutation_method** (`str`): The mutation method used.
+- **primary_replacement_method** (`str`): The primary replacement method for the island model.
+- **secundary_replacement_method** (`str`): The secondary replacement method for the island model.
 - **standard_execution** (`bool`): Indicates if the island model will be used.
 - **population** (`list[Individual]`): The list of individuals in the population.
 - **generation** (`int`): The current generation number.
@@ -56,6 +60,13 @@ Initializes the genetic algorithm with the provided parameters.
 - `"swap_mutation"`: Swap mutation.
 - `"scramble_mutation"`: Scramble mutation.
 - `"random"`: Random mutation.
+
+#### Replacement Methods:
+- `"random"`: Randomly selects individuals for replacement.
+- `"best"`: Selects the best individuals for replacement.
+- `"worst"`: Selects the worst individuals for replacement.
+
+
 
 ### Method `solve`
 
@@ -321,3 +332,26 @@ Migration is the process of transferring individuals between islands. The freque
 - **Interval-based Migration:** Individuals migrate after a fixed number of generations.
 - **Random Migration:** Random individuals are selected for migration.
 - **Best Individual Migration:** The best individual from one island is selected to migrate to another island.
+
+
+### Replacement Methods
+
+The replacement methods are used in the **island model** to determine which individuals in a population (island) will be replaced during migration. These methods ensure that the population evolves effectively by replacing individuals based on specific criteria.
+
+#### Available Replacement Methods:
+1. **`"random"`**:
+   - Randomly selects individuals for replacement.
+   - Useful for maintaining diversity in the population.
+
+2. **`"best"`**:
+   - Selects the best individuals (those with the highest fitness scores) for replacement.
+   - Useful for preserving high-quality solutions while allowing migration.
+
+3. **`"worst"`**:
+   - Selects the worst individuals (those with the lowest fitness scores) for replacement.
+   - Useful for improving the overall quality of the population by removing weak solutions.
+
+#### How It Works:
+- When migration occurs, individuals are selected from one island to replace individuals in another island.
+- The `primary_replacement_method` determines which individuals are chosen for migration.
+- The `secundary_replacement_method` determines which individuals in the destination island are replaced.

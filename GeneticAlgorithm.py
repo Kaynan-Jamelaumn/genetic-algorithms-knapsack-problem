@@ -4,9 +4,10 @@ from SelectionMethods import *
 from Visualization import *
 from CrossOverMethods import *
 from MutationMethods import *
+from ReplacementMethods import *
 
 class GeneticAlgorithm():
-    def __init__(self, population_size: int, selection_method: str = "roulette", crossover_method: str = "single_point", mutation_method: str = "bit_flip", standard_execution: bool = False):
+    def __init__(self, population_size: int, selection_method: str = "roulette", crossover_method: str = "single_point", mutation_method: str = "bit_flip", standard_execution: bool = False,  primary_replacement_method: str = "best", secundary_replacement_method: str = "random"):
         """
         Initialize the Genetic Algorithm with the given parameters.
         
@@ -19,6 +20,8 @@ class GeneticAlgorithm():
         self.selection_method: str = selection_method  # Selection method to use
         self.crossover_method: str = crossover_method  # Crossover method to use
         self.mutation_method: str = mutation_method # mutation method to use
+        self.primary_replacement_method: str = primary_replacement_method # The primary individual to migrate 
+        self.secundary_replacement_method: str = secundary_replacement_method # The secundary individual to migrate 
         self.standard_execution: bool  = standard_execution # Use island model or normal model
         self.population: list[Individual] = []  # List to hold the population of individuals
         self.generation: int = 0  # Current generation number
@@ -58,6 +61,17 @@ class GeneticAlgorithm():
             "scramble_mutation": MutationMethods.scramble_mutation,
             "random": MutationMethods.random_mutation,
         }
+
+        self.migration_methods = {
+            "random": "random",
+        }
+
+        self.replacement_methods = {
+            "random": ReplacementMethods.random_individual_replacement,
+            "best": ReplacementMethods.best_individual_replacement,
+            "worst": ReplacementMethods.worst_individual_replacement,
+        }
+
 
     def initialize_population(self, spaces: list[float], values: list[float], space_limit: float) -> None:
         """
@@ -397,7 +411,7 @@ class GeneticAlgorithm():
                 end = self.population_size
             self.islands.append(self.population[start:end])  # Append the slice of the population corresponding to the current island to the islands list
 
-    def perform_migration(self, num_migrants: int) -> None:
+    def perform_migration(self, num_migrants: int) -> None: #ring_elitist_random_replacement
         """
         Performs migration of individuals between islands to introduce genetic diversity.
 
@@ -411,13 +425,15 @@ class GeneticAlgorithm():
         """
         migrants = []
         for island in self.islands:
-            sorted_island = sorted(island, key=lambda x: x.evaluation_score, reverse=True)
-            migrants.append(sorted_island[:num_migrants])  # Select top migrants
+             # Use the best_individual_replacement method to select the top migrants
+            migrant_indexes = self.apply_replacement_method(self.primary_replacement_method, island, num_migrants)
+            # Retrieve the actual migrants using the indexes
+            migrants.append([island[idx] for idx in migrant_indexes])
 
         for i in range(len(self.islands)):
             dest_idx = (i + 1) % len(self.islands)  # Determine the target island
             for migrant in migrants[i]:
-                idx = random.randint(0, len(self.islands[dest_idx]) - 1)  # Select a random replacement
+                idx = self.apply_replacement_method(self.secundary_replacement_method, self.islands[dest_idx]) 
                 self.islands[dest_idx][idx] = migrant  # Replace with migrant
                 self.islands[dest_idx][idx].evaluate()  # Re-evaluate the replaced individual
 
@@ -438,3 +454,13 @@ class GeneticAlgorithm():
         all_individuals.sort(key=lambda x: x.evaluation_score, reverse=True)  # Sort by best fitness
         self.best_solution = all_individuals[0]  # Pick the top individual
         self.solution_list.append(self.best_solution.evaluation_score)  # Store the best solution score
+
+
+    def apply_replacement_method(self, migrate_target: str,  island: list[Individual], num_migrants: int = None) -> int:
+        """
+        Apply the specified mutation method to the individual.
+        """
+        if migrate_target not in self.replacement_methods:
+            raise ValueError(f"Invalid replacement method: {migrate_target}")
+        replacement_function = self.replacement_methods[migrate_target]
+        return replacement_function(island, num_migrants)
