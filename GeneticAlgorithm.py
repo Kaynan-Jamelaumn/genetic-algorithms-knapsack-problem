@@ -16,7 +16,7 @@ class GeneticAlgorithm():
         crossover_method: str = "single_point", 
         mutation_method: str = "bit_flip", 
         standard_execution: bool = False, 
-        migration_method: str = "adaptive_migration", 
+        migration_method: str = "star_migration_bidirectional", 
         primary_replacement_method: str = "best", 
         secundary_replacement_method: str = "random"):
         """
@@ -78,6 +78,8 @@ class GeneticAlgorithm():
             "ring_migration": MigrationMethods.ring_migration,
             "random_migration": MigrationMethods.random_migration,
             "adaptive_migration": MigrationMethods.adaptive_migration,
+            "star_migration_bidirectional": MigrationMethods.star_migration_bidirectional,
+            "star_migration_unidirectional": MigrationMethods.star_migration_unidirectional,
         }
 
         self.replacement_methods = {

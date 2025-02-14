@@ -66,7 +66,9 @@ Initializes the genetic algorithm with the provided parameters.
 #### Migration Methods:
 - `"ring"`: Migrants are sent to the next island in a ring-like fashion.
 - `"random"`: Randomly selects individuals and migrate them between islands.
-
+- `"adaptive_migration"`: Randomly selects individuals and migrate them between islands.
+- `"star_migration_bidirectional"`: Randomly selects individuals and migrate them between islands.
+- `"star_migration_unidirectional"`: Randomly selects individuals and migrate them between islands.
 #### Replacement Methods:
 - `"random"`: Randomly selects individuals for replacement.
 - `"best"`: Selects the best individuals for replacement.
@@ -335,9 +337,12 @@ Island models are a variation of the standard genetic algorithm where the popula
 
 Migration is the process of transferring individuals between islands. The frequency and the number of individuals migrating can be configured, and there are different strategies for selecting which individuals will migrate:
 
-- **Ring Migration:** Individuals migrate in a circular pattern between islands, ensuring a structured flow of genetic material..
+
+- **Ring Migration:** Individuals migrate in a circular pattern between islands, ensuring a structured flow of genetic material.
 - **Random Migration:** Individuals migrate to randomly selected islands instead of following a fixed pattern, increasing genetic diversity.
 - **Adaptive Migration:** The number of migrating individuals is dynamically adjusted based on the genetic diversity of each island, balancing exploration and exploitation.
+- **Star Migration (Unidirectional):** Migrants are sent to a central hub, mixed, and then redistributed to all islands.
+- **Star Migration (Bidirectional):** A central hub island exchanges individuals with all other islands, promoting two-way genetic exchange.
 
 
 ### Replacement Methods
