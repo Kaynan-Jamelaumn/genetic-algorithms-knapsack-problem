@@ -117,9 +117,11 @@ class GeneticAlgorithm():
         if individual.evaluation_score > self.best_solution.evaluation_score:
             self.best_solution = individual
 
-    def sum_avaliation(self) -> float:
+    def sum_avaliation(self, population=None) -> float:
         """Calculate the total evaluation score of the population."""
-        return sum(ind.evaluation_score for ind in self.population)
+        if population is None:
+            population = self.population
+        return sum(ind.evaluation_score for ind in population)
     
     def apply_crossover(self, parent1: Individual, parent2: Individual) -> tuple[Individual, Individual]:
         """
@@ -133,23 +135,27 @@ class GeneticAlgorithm():
             raise ValueError(f"Invalid crossover method: {self.crossover_method}")
         return self.crossover_methods[self.crossover_method](parent1, parent2)
 
-    def select_parent(self, total_score: float) -> Individual:
+    def select_parent(self, total_score: float, population: list[Individual] = None) -> Individual:
         """
         Select a parent based on the chosen selection method.
         
         :param total_score: The total evaluation score of the population (used for some selection methods).
         :return: The selected parent.
         """
+
+        if population is None:
+            population = self.population
         if self.selection_method not in self.selection_methods:
             raise ValueError(f"Invalid selection method: {self.selection_method}")
-        
+
         # Call the appropriate selection method dynamically
         method = self.selection_methods[self.selection_method]
-        
         if method in {SelectionMethods.roulette_selection, SelectionMethods.sus_selection}:
-            return method(self.population, total_score)
+            return method(population, total_score)
         else:
-            return method(self.population)
+            return method(population)
+
+
 
     def apply_mutation(self, individual: Individual, mutation_chance: float):
         """
@@ -173,10 +179,15 @@ class GeneticAlgorithm():
         best = self.population[0]
         print(f"G:{best.generation} -> Score: {best.evaluation_score} Chromosome: {best.chromosome}")
 
-    def calculate_diversity(self) -> float:
+    def calculate_diversity(self, population: list[Individual] = None) -> float:
         """
         Get the diversity (how individuals are different from each other)
         """
+        if population is None:
+            population = self.population
+        pop_size = len(population)
+        if pop_size < 2:
+             return 0
         diversity = 0
         for i in range(len(self.population)):
             for j in range(i+1, len(self.population)):# Start from i+1 to avoid double counting
@@ -193,7 +204,7 @@ class GeneticAlgorithm():
         if (adaptative_mutation):
             return mutation_rate * (1 - diversity) # Higher diversity -> Lower mutation
         else: 
-            return  mutation_rate
+            return mutation_rate
 
 
 
