@@ -18,7 +18,8 @@ class GeneticAlgorithm():
         standard_execution: bool = False, 
         migration_method: str = "star_migration_bidirectional", 
         primary_replacement_method: str = "best", 
-        secundary_replacement_method: str = "random"):
+        secundary_replacement_method: str = "random",
+        migration_args: tuple = None ):
         """
         Initialize the Genetic Algorithm with the given parameters.
         
@@ -40,7 +41,7 @@ class GeneticAlgorithm():
         self.best_solution: Individual = None  # Best solution found so far
         self.solution_list: list[float] = []  # List to store the best solution scores over generations
         self.islands: list[list[Individual]] = []  # List of populations for island model
-
+        self.migration_args = migration_args if migration_args is not None else () 
         # Mapping of selection methods to their corresponding functions
         self.selection_methods = {
             "roulette": SelectionMethods.roulette_selection,
@@ -493,4 +494,20 @@ class GeneticAlgorithm():
         if self.migration_method not in self.migration_methods:
             raise ValueError(f"Invalid replacement method: {self.migration_method}")
         migration_function = self.migration_methods[self.migration_method]
-        migration_function(self.islands, num_migrants, self.replacement_methods, self.primary_replacement_method, self.secundary_replacement_method)
+        # Get the function's parameters
+        sig = inspect.signature(migration_function)
+        params = list(sig.parameters.values())
+        
+        # Calculate how many additional parameters the function expects after the first 5
+        # (islands, num_migrants, replacement_methods, primary, secondary)
+        num_extra_params = max(len(params) - 5, 0)
+        args_to_pass = self.migration_args[:num_extra_params]  # Ensure non-negative
+        
+        # Slice migration_args to match the number of extra parameters
+        args_to_pass = self.migration_args[:num_extra_params]
+        migration_function(self.islands,
+                            num_migrants,
+                            self.replacement_methods,
+                            self.primary_replacement_method,
+                            self.secundary_replacement_method,
+                            *args_to_pass)

@@ -42,7 +42,7 @@ total_space = 10  # Knapsack capacity
 selection_method = "roulette"
 crossover_method = "single_point"
 mutation_method = "swap_mutation"
-migration_method = "star_migration_bidirectional"
+migration_method = "tournament_migration"
 primary_replacement_method = "best"
 secundary_replacement_method = "random"
 standard_execution = False  # Use island model or normal model (False = use island model)

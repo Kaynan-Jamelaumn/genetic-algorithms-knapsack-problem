@@ -1,6 +1,7 @@
 from Individual import Individual
 from ReplacementMethods import *
 from typing import Callable
+import inspect
 
 class MigrationMethods:
     @staticmethod
@@ -290,7 +291,12 @@ class MigrationMethods:
     
 
     @staticmethod
-    def tournament_migration(islands: list[list[Individual]], num_migrants: int, replacement_methods: dict[str, Callable[[list["Individual"], int], int | list[int]]], secondary_replacement_method: str = "random", tournament_size = 3) -> None:
+    def tournament_migration(islands: list[list[Individual]],
+                              num_migrants: int,
+                            replacement_methods: dict[str, Callable[[list["Individual"], int], int | list[int]]],
+                            primary_replacement_method: str,
+                            secondary_replacement_method: str = "random",
+                            tournament_size = 3) -> None:
         """
         Performs migration of individuals between islands using tournament selection.
 
@@ -318,7 +324,7 @@ class MigrationMethods:
                 # Randomly select tournament_size individuals
                 tournament = random.sample(island, tournament_size)
                 # Select the best individual from the tournament
-                best_individual = min(tournament, key=lambda ind: ind.fitness)
+                best_individual = min(tournament, key=lambda ind: ind.evaluation_score)
                 selected_migrants.append(best_individual)
             migrants.append(selected_migrants)
 
