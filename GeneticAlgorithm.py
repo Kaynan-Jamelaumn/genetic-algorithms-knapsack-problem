@@ -80,6 +80,7 @@ class GeneticAlgorithm():
             "adaptive_migration": MigrationMethods.adaptive_migration,
             "star_migration_bidirectional": MigrationMethods.star_migration_bidirectional,
             "star_migration_unidirectional": MigrationMethods.star_migration_unidirectional,
+            "tournament_migration": MigrationMethods.tournament_migration
         }
 
         self.replacement_methods = {

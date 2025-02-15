@@ -76,6 +76,7 @@ class MigrationMethods:
                 islands[dest_idx][idx] = migrant  # Replace with migrant
                 islands[dest_idx][idx].evaluate()  # Re-evaluate the replaced individual
 
+
     @staticmethod
     def adaptive_migration(islands: list[list[Individual]], num_migrants: int, 
                             replacement_methods: dict[str, Callable[[list["Individual"], int], int | list[int]]], 
@@ -286,3 +287,47 @@ class MigrationMethods:
             raise ValueError(f"Invalid replacement method: {replacement_target}")
         replacement_function = replacement_methods[replacement_target]
         return replacement_function(island, num_migrants)
+    
+
+    @staticmethod
+    def tournament_migration(islands: list[list[Individual]], num_migrants: int, replacement_methods: dict[str, Callable[[list["Individual"], int], int | list[int]]], secondary_replacement_method: str = "random", tournament_size = 3) -> None:
+        """
+        Performs migration of individuals between islands using tournament selection.
+
+        This method selects a specified number of individuals from each island using tournament selection
+        and migrates them to the next island in a circular pattern. The migrated individuals replace
+        existing individuals in the destination island based on a chosen replacement method.
+
+        Steps:
+        1. Selects num_migrants individuals from each island using tournament selection.
+        2. Migrates individuals to the next island in a circular order.
+        3. Replaces individuals in the destination island using the secondary replacement method.
+        4. Evaluates the updated individuals after replacement.
+
+        :param islands: A list of islands, where each island is a list of individuals.
+        :param num_migrants: The number of individuals to migrate per island.
+        :param replacement_methods: A dictionary mapping method names to callable functions for selecting replacement indices.
+        :param tournament_size: The number of individuals to compete in each tournament.
+        :param secondary_replacement_method: The method used to select individuals for replacement in the destination island.
+        """
+        migrants = []
+        for island in islands:
+            # Select migrants using tournament selection
+            selected_migrants = []
+            for _ in range(num_migrants):
+                # Randomly select tournament_size individuals
+                tournament = random.sample(island, tournament_size)
+                # Select the best individual from the tournament
+                best_individual = min(tournament, key=lambda ind: ind.fitness)
+                selected_migrants.append(best_individual)
+            migrants.append(selected_migrants)
+
+        for i in range(len(islands)):
+            dest_idx = (i + 1) % len(islands)  # Determine the target island
+            for migrant in migrants[i]:
+                # Replace one individual at a time using the secondary replacement method
+                idx = MigrationMethods.apply_replacement_method(replacement_methods, secondary_replacement_method, islands[dest_idx], 1)
+                if isinstance(idx, list):
+                    idx = idx[0]  # If a list is returned, take the first index
+                islands[dest_idx][idx] = migrant  # Replace with migrant
+                islands[dest_idx][idx].evaluate()  # Re-evaluate the replaced individual

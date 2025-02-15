@@ -69,6 +69,7 @@ Initializes the genetic algorithm with the provided parameters.
 - `"adaptive_migration"`: Randomly selects individuals and migrate them between islands.
 - `"star_migration_bidirectional"`: Randomly selects individuals and migrate them between islands.
 - `"star_migration_unidirectional"`: Randomly selects individuals and migrate them between islands.
+- `"tournament_migration"`: Make individuals compete and migrate them between islands.
 #### Replacement Methods:
 - `"random"`: Randomly selects individuals for replacement.
 - `"best"`: Selects the best individuals for replacement.
@@ -343,8 +344,7 @@ Migration is the process of transferring individuals between islands. The freque
 - **Adaptive Migration:** The number of migrating individuals is dynamically adjusted based on the genetic diversity of each island, balancing exploration and exploitation.
 - **Star Migration (Unidirectional):** Migrants are sent to a central hub, mixed, and then redistributed to all islands.
 - **Star Migration (Bidirectional):** A central hub island exchanges individuals with all other islands, promoting two-way genetic exchange.
-
-
+- **Tournament Migration:** Individuals are selected for migration based on a tournament selection process within their island. A subset of individuals is randomly chosen, and the best among them is selected for migration.
 ### Replacement Methods
 
 The replacement methods are used in the **island model** to determine which individuals in a population (island) will be replaced during migration. These methods ensure that the population evolves effectively by replacing individuals based on specific criteria.
