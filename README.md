@@ -37,6 +37,7 @@ Initializes the genetic algorithm with the provided parameters.
 - **primary_replacement_method** (`str`, optional): The method used to select individuals for replacement in the island model. Default: `"best"`.
 - **secundary_replacement_method** (`str`, optional): The secondary method used to select individuals for replacement in the island model. Default: `"random"`.
 - **standard_execution** (`bool`, optional): Determines if the algorithm will run in the standard model or the island model. Default: `False`.
+- **migration_args** (`tuple`, optional): Additional arguments for migration configuration. Default: `None`.
 
 #### Attributes:
 - **population_size** (`int`): The size of the population.
@@ -87,8 +88,8 @@ Initializes the genetic algorithm with the provided parameters.
 - `"adaptive_migration"`: Adjusts migration based on population diversity.
 - `"star_migration_bidirectional"`: Mixes indivuals into a central island and redistributes them to all island.
 - `"star_migration_unidirectional"`: two-way migration between a central hub island and spoke islands.
-
 - `"tournament_migration"`: Make individuals compete and migrate them between islands.
+
 #### Replacement Methods ♻️
 - `"random"`: Randomly selects individuals for replacement.
 - `"best"`: Selects the best individuals for replacement.
@@ -406,6 +407,14 @@ Migration is the process of transferring individuals between islands. The freque
   3. Replace individuals in both the hub and spoke islands.
   4. Re-evaluate the updated individuals.
 - **Best for:** Centralized genetic exchange while maintaining local adaptations.
+
+#### **6. Tournament Migration (`tournament_migration`)**
+- **Description:** Competitive migration selection
+- **Steps:**
+  1. Tournament selection for migrants
+  2. Migrate selected individuals
+  3. Replace according to replacing method   method
+  4. Re-evaluate updated individuals
 
 
 ### Replacement Methods ♻️
