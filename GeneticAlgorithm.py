@@ -6,6 +6,7 @@ from CrossOverMethods import *
 from MutationMethods import *
 from ReplacementMethods import *
 from MigrationMethods import *
+from GeneticOperators import *
 
 from typing import Callable
 
@@ -42,38 +43,17 @@ class GeneticAlgorithm():
         self.solution_list: list[float] = []  # List to store the best solution scores over generations
         self.islands: list[list[Individual]] = []  # List of populations for island model
         self.migration_args = migration_args if migration_args is not None else () 
-        # Mapping of selection methods to their corresponding functions
-        self.selection_methods = {
-            "roulette": SelectionMethods.roulette_selection,
-            "tournament": SelectionMethods.tournament_selection,
-            "rank": SelectionMethods.rank_selection,
-            "truncation": SelectionMethods.truncation_selection,
-            "sus": SelectionMethods.sus_selection,
-            "steady_state": SelectionMethods.steady_state_selection,
-            "random": SelectionMethods.random_selection,
-            "boltzmann": SelectionMethods.boltzmann_selection,
-            "linear_ranking": SelectionMethods.linear_ranking_selection,
-            "exponential_ranking": SelectionMethods.exponential_ranking_selection,
-            "mu_lambda": SelectionMethods.mu_lambda_selection,
-            "metropolis_hastings": SelectionMethods.metropolis_hastings_selection,
-            "rss": SelectionMethods.remainder_stochastic_sampling
-        }
 
-        self.crossover_methods = {
-            "single_point": CrossoverMethods.single_point_crossover,
-            "uniform": CrossoverMethods.uniform_crossover,
-            "two_point": CrossoverMethods.two_point_crossover,
-            "arithmetic": CrossoverMethods.arithmetic_crossover,
-            "half_uniform": CrossoverMethods.half_uniform_crossover
-        }
-
-        # Mapping of mutation methods
-        self.mutation_methods = {
-            "bit_flip": MutationMethods.bit_flip,
-            "swap_mutation": MutationMethods.swap_mutation,
-            "scramble_mutation": MutationMethods.scramble_mutation,
-            "random": MutationMethods.random_mutation,
-        }
+        self.genetic_operators = GeneticOperators(
+            selection_method=selection_method,
+            crossover_method=crossover_method,
+            mutation_method=mutation_method,
+            migration_method=migration_method,
+            primary_replacement_method=primary_replacement_method,
+            secondary_replacement_method=secundary_replacement_method,  # Correct typo here
+            migration_args=self.migration_args,
+        )
+       
 
         self.migration_methods = {
             "ring_migration": MigrationMethods.ring_migration,
@@ -124,18 +104,6 @@ class GeneticAlgorithm():
             population = self.population
         return sum(ind.evaluation_score for ind in population)
     
-    def apply_crossover(self, parent1: Individual, parent2: Individual) -> tuple[Individual, Individual]:
-        """
-        Apply crossover between two parents to produce two children.
-        
-        :param parent1: The first parent.
-        :param parent2: The second parent.
-        :return: Two new individuals (children) resulting from the crossover.
-        """
-        if self.crossover_method not in self.crossover_methods:
-            raise ValueError(f"Invalid crossover method: {self.crossover_method}")
-        return self.crossover_methods[self.crossover_method](parent1, parent2)
-
     def select_parent(self, total_score: float, population: list[Individual] = None) -> Individual:
         """
         Select a parent based on the chosen selection method.
@@ -157,21 +125,6 @@ class GeneticAlgorithm():
             return method(population)
 
 
-
-    def apply_mutation(self, individual: Individual, mutation_chance: float):
-        """
-        Apply the specified mutation method to the individual.
-        """
-        if self.mutation_method not in self.mutation_methods:
-            raise ValueError(f"Invalid mutation method: {self.mutation_method}")
-        mutation_function = self.mutation_methods[self.mutation_method]
-          
-        if self.mutation_method == "swap_mutation" or self.mutation_method == "scramble_mutation":
-            mutation_function(individual)
-        else:
-            mutation_function(individual, mutation_chance)
-
-        
 
     def visualize_generation(self) -> None:
         """
@@ -404,15 +357,15 @@ class GeneticAlgorithm():
         num_offspring = (len(self.population) - elite_count) // 2  # Number of pairs
         for _ in range(num_offspring):
             # **Selection:** Pick two parents
-            parent1 = self.select_parent(total_score)
-            parent2 = self.select_parent(total_score)
+            parent1 = self.genetic_operators.select_parent(self.population, total_score)
+            parent2 = self.genetic_operators.select_parent(self.population, total_score)
 
             # **Crossover:** Generate two new children
-            child1, child2 = self.apply_crossover(parent1, parent2)
+            child1, child2 = self.genetic_operators.apply_crossover(parent1, parent2)
 
             # **Mutation:** Randomly mutate children
-            self.apply_mutation(child1, mutation_rate)
-            self.apply_mutation(child2, mutation_rate)
+            self.genetic_operators.apply_mutation(child1, mutation_rate)
+            self.genetic_operators.apply_mutation(child2, mutation_rate)
 
             # Add children to the new population
             new_population.extend([child1, child2])
