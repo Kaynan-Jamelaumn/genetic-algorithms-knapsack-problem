@@ -7,6 +7,7 @@ from MutationMethods import *
 from ReplacementMethods import *
 from MigrationMethods import *
 from GeneticOperators import *
+from PopulationManager import *
 
 from typing import Callable
 
@@ -53,7 +54,7 @@ class GeneticAlgorithm():
             secondary_replacement_method=secundary_replacement_method,  # Correct typo here
             migration_args=self.migration_args,
         )
-       
+        self.population_manager = PopulationManager(population_size)
 
         self.migration_methods = {
             "ring_migration": MigrationMethods.ring_migration,
@@ -71,38 +72,6 @@ class GeneticAlgorithm():
         }
 
 
-    def initialize_population(self, spaces: list[float], values: list[float], space_limit: float) -> None:
-        """
-        Initialize the population with random individuals.
-        
-        :param spaces: List of space requirements for each item.
-        :param values: List of values for each item.
-        :param space_limit: Maximum space limit for the knapsack problem.
-        """
-        for _ in range(self.population_size):
-            individual = Individual(spaces, values, space_limit)  # Create a new individual
-            individual.generate_chromosome()  # Generate a random chromosome for the individual
-            self.population.append(individual)  # Add the individual to the population
-        self.best_solution = self.population[0]  # Initialize the best solution as the first individual
-
-    def sort_population(self) -> None:
-        """Sort the population based on evaluation scores in descending order."""
-        self.population.sort(key=lambda ind: ind.evaluation_score, reverse=True)
-
-    def update_best_individual(self, individual: Individual) -> None:
-        """
-        Update the best solution if the given individual has a better score.
-        
-        :param individual: The individual to compare with the current best solution.
-        """
-        if individual.evaluation_score > self.best_solution.evaluation_score:
-            self.best_solution = individual
-
-    def sum_avaliation(self, population=None) -> float:
-        """Calculate the total evaluation score of the population."""
-        if population is None:
-            population = self.population
-        return sum(ind.evaluation_score for ind in population)
     
     def select_parent(self, total_score: float, population: list[Individual] = None) -> Individual:
         """
@@ -113,7 +82,7 @@ class GeneticAlgorithm():
         """
 
         if population is None:
-            population = self.population
+            population = self.population_manager.population
         if self.selection_method not in self.selection_methods:
             raise ValueError(f"Invalid selection method: {self.selection_method}")
 
@@ -130,7 +99,7 @@ class GeneticAlgorithm():
         """
         Print the best individual of the current generation.
         """
-        best = self.population[0]
+        best = self.population_manager.population[0]
         print(f"G:{best.generation} -> Score: {best.evaluation_score} Chromosome: {best.chromosome}")
 
     def calculate_diversity(self, population: list[Individual] = None) -> float:
@@ -138,17 +107,17 @@ class GeneticAlgorithm():
         Get the diversity (how individuals are different from each other)
         """
         if population is None:
-            population = self.population
+            population = self.population_manager.population
         pop_size = len(population)
         if pop_size < 2:
              return 0
         diversity = 0
-        for i in range(len(self.population)):
-            for j in range(i+1, len(self.population)):# Start from i+1 to avoid double counting
+        for i in range(len(self.population_manager.population)):
+            for j in range(i+1, len(self.population_manager.population)):# Start from i+1 to avoid double counting
                 # Calculate how many genes differ between the two individuals' chromosomes
                 diversity += sum(c1 != c2 for c1, c2 in zip(
-                    self.population[i].chromosome,
-                    self.population[j].chromosome))
+                    self.population_manager.population[i].chromosome,
+                    self.population_manager.population[j].chromosome))
         # Normalize diversity by the total number of unique individual pairs (combinations)
         return diversity / (self.population_size * (self.population_size - 1) / 2)
 
@@ -203,14 +172,14 @@ class GeneticAlgorithm():
                 num_islands, migration_interval, num_migrants, spaces, values, space_limit
             )
 
-        print(f"\nBest solution -> G: {self.best_solution.generation}, "
-            f"Score: {self.best_solution.evaluation_score}, "
-            f"Chromosome: {self.best_solution.chromosome}")
+        print(f"\nBest solution -> G: {self.population_manager.best_solution.generation}, "
+            f"Score: {self.population_manager.best_solution.evaluation_score}, "
+            f"Chromosome: {self.population_manager.best_solution.chromosome}")
         
         if generate_graphic:
             Visualization.plot_generation_scores(generation_scores, avg_scores)
         
-        return self.best_solution, generation_scores
+        return self.population_manager.best_solution, generation_scores
 
     def execute_standard(self, 
                         mutation_rate: float,
@@ -233,34 +202,34 @@ class GeneticAlgorithm():
         :return: A list of best generation scores and average scores per generation.
         """
         self.initialize_and_evaluate(spaces, values, space_limit)
-        self.sort_population()
-        self.best_solution = self.population[0]
-        self.solution_list = [self.best_solution.evaluation_score]
+        self.population_manager.sort_population()
+        self.population_manager.best_solution = self.population_manager.population[0]
+        self.solution_list = [self.population_manager.best_solution.evaluation_score]
         self.visualize_generation()
 
         # Initialize lists to track generation scores
         generation_scores = [self.best_solution.evaluation_score]
-        avg_scores = [self.sum_avaliation() / self.population_size]
+        avg_scores = [self.population_manager.sum_evaluations() / self.population_size]
 
         # Iterate through the generations
         for _ in range(num_generations):
             # Calculate adaptive mutation rate if applicable
             adapted_mutation_rate = self.calculate_mutation_rate(adaptative_mutation, mutation_rate)
-            total_score = self.sum_avaliation()
+            total_score = self.population_manager.sum_evaluations()
             avg_scores.append(total_score / self.population_size)
 
             # Generate a new population for the next generation
-            new_population = self.generate_new_population(self.population, total_score, adapted_mutation_rate, elitism_chance)
-            self.population = new_population
+            new_population = self.population_manager.generate_new_population(self.population_manager.population, total_score, adapted_mutation_rate, elitism_chance, self.genetic_operators)
+            self.population_manager.population = new_population
 
             # Evaluate and sort the new population
-            self.evaluate_population()
-            self.sort_population()
+            self.population_manager.evaluate_population()
+            self.population_manager.sort_population()
             self.visualize_generation()
 
             # Update the best solution found so far
-            best_current = self.population[0]
-            self.update_best_individual(best_current)
+            best_current = self.population_manager.population[0]
+            self.population_manager.update_best_solution(best_current)
             generation_scores.append(best_current.evaluation_score)
 
         # Return the scores for each generation
@@ -296,13 +265,13 @@ class GeneticAlgorithm():
 
         # Split the population into isolated islands
         self.split_into_islands(num_islands)
-        self.sort_population()
-        self.best_solution = self.population[0]
-        self.solution_list = [self.best_solution.evaluation_score]
+        self.population_manager.sort_population()
+        self.population_manager.best_solution = self.population_manager.population[0]
+        self.solution_list = [self.population_manager.best_solution.evaluation_score]
 
         # Initialize lists to track generation scores
-        generation_scores = [self.best_solution.evaluation_score]
-        total_avg = self.sum_avaliation() / self.population_size
+        generation_scores = [self.population_manager.best_solution.evaluation_score]
+        total_avg = self.population_manager.sum_evaluations() / self.population_size
         avg_scores = [total_avg]
 
         # Iterate through the generations
@@ -313,7 +282,7 @@ class GeneticAlgorithm():
                     self.islands[island_idx], mutation_rate, adaptative_mutation, elitism_chance
                 )
                 # Update the best individual for the island
-                self.update_best_individual(self.islands[island_idx][0])
+                self.population_manager.update_best_solution(self.islands[island_idx][0])
 
             # Perform migration between islands at the specified interval
             if (gen + 1) % migration_interval == 0:
@@ -335,42 +304,9 @@ class GeneticAlgorithm():
 
     def initialize_and_evaluate(self, spaces: list[float], values: list[float], space_limit: float) -> None:
         """Initialize the population and evaluate each individual."""
-        self.initialize_population(spaces, values, space_limit)
-        self.evaluate_population()
+        self.population_manager.initialize_population(spaces, values, space_limit)
+        self.population_manager.evaluate_population()
 
-    def evaluate_population(self) -> None:
-        """Evaluate all individuals in the current population."""
-        for individual in self.population:
-            individual.evaluate()
-
-    def sort_population(self) -> None:
-        """Sort the population based on evaluation scores."""
-        self.population.sort(key=lambda x: x.evaluation_score, reverse=True)
-
-    def generate_new_population(self, current_population: int, total_score: float, mutation_rate: float, elitism_chance: float) -> list[int]:
-        """Generate a new population through elitism, selection, crossover, and mutation."""
-        # **Elitism:** Select the top-performing individuals to carry over.
-        elite_count = max(1, int(elitism_chance * len(current_population)))
-        new_population = current_population[:elite_count]
-
-        #**Selection and Crossover:** Generate offspring to fill the population
-        num_offspring = (len(self.population) - elite_count) // 2  # Number of pairs
-        for _ in range(num_offspring):
-            # **Selection:** Pick two parents
-            parent1 = self.genetic_operators.select_parent(self.population, total_score)
-            parent2 = self.genetic_operators.select_parent(self.population, total_score)
-
-            # **Crossover:** Generate two new children
-            child1, child2 = self.genetic_operators.apply_crossover(parent1, parent2)
-
-            # **Mutation:** Randomly mutate children
-            self.genetic_operators.apply_mutation(child1, mutation_rate)
-            self.genetic_operators.apply_mutation(child2, mutation_rate)
-
-            # Add children to the new population
-            new_population.extend([child1, child2])
-
-        return new_population
 
     def evolve_island(self, island: int, mutation_rate: float, adaptative_mutation: bool, elitism_chance: float):
         """
@@ -390,19 +326,19 @@ class GeneticAlgorithm():
         :param elitism_chance: The percentage of top individuals retained unaltered.
         :return: The evolved island's population.
         """
-        original_population = self.population  # Store the original population
-        self.population = island.copy()  # Work on the island's population
+        original_population = self.population_manager.population  # Store the original population
+        self.population_manager.population = island.copy()  # Work on the island's population
 
-        total_score = self.sum_avaliation()  # Compute total fitness score
+        total_score = self.population_manager.sum_evaluations()  # Compute total fitness score
         adapted_rate = self.calculate_mutation_rate(adaptative_mutation, mutation_rate)  # Adjust mutation rate if needed
-        new_population = self.generate_new_population(self.population, total_score, adapted_rate, elitism_chance)
+        new_population = self.population_manager.generate_new_population(self.population_manager.population, total_score, adapted_rate, elitism_chance, self.genetic_operators)
 
-        self.population = new_population  # Replace with the new evolved population
-        self.evaluate_population()  # Evaluate fitness
-        self.sort_population()  # Sort by best fitness
+        self.population_manager.population = new_population  # Replace with the new evolved population
+        self.population_manager.evaluate_population()  # Evaluate fitness
+        self.population_manager.sort_population()  # Sort by best fitness
 
-        evolved_island = self.population  # Store the evolved island
-        self.population = original_population  # Restore original population
+        evolved_island = self.population_manager.population  # Store the evolved island
+        self.population_manager.population = original_population  # Restore original population
         return evolved_island
 
     def split_into_islands(self, num_islands: int) -> None:
@@ -418,16 +354,8 @@ class GeneticAlgorithm():
             end = start + island_size   # Calculate the ending index for the current island's population
             if i == num_islands - 1:  # Ensure the last island gets any remaining individuals
                 end = self.population_size
-            self.islands.append(self.population[start:end])  # Append the slice of the population corresponding to the current island to the islands list
+            self.islands.append(self.population_manager.population[start:end])  # Append the slice of the population corresponding to the current island to the islands list
 
-    def update_best_individual(self, candidate: Individual) -> None:
-        """
-        Updates the best solution found so far if the candidate is better.
-
-        :param candidate: The individual being compared to the current best.
-        """
-        if candidate.evaluation_score > self.best_solution.evaluation_score:
-            self.best_solution = candidate
 
     def update_final_island_best(self) -> None:
         """
@@ -435,8 +363,8 @@ class GeneticAlgorithm():
         """
         all_individuals = [ind for island in self.islands for ind in island]  # Flatten all islands into one list
         all_individuals.sort(key=lambda x: x.evaluation_score, reverse=True)  # Sort by best fitness
-        self.best_solution = all_individuals[0]  # Pick the top individual
-        self.solution_list.append(self.best_solution.evaluation_score)  # Store the best solution score
+        self.population_manager.best_solution = all_individuals[0]  # Pick the top individual
+        self.solution_list.append(self.population_manager.best_solution.evaluation_score)  # Store the best solution score
 
 
 
