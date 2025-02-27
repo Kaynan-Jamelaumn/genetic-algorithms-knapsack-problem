@@ -45,7 +45,7 @@ mutation_method = "swap_mutation"
 migration_method = "tournament_migration"
 primary_replacement_method = "best"
 secundary_replacement_method = "random"
-standard_execution = False  # Use island model or normal model (False = use island model)
+standard_execution = True  # Use island model or normal model (False = use island model)
 num_islands = 4
 migration_interval = 5
 num_migrants = 2

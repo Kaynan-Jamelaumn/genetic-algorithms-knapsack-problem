@@ -72,28 +72,6 @@ class GeneticAlgorithm():
         }
 
 
-    
-    def select_parent(self, total_score: float, population: list[Individual] = None) -> Individual:
-        """
-        Select a parent based on the chosen selection method.
-        
-        :param total_score: The total evaluation score of the population (used for some selection methods).
-        :return: The selected parent.
-        """
-
-        if population is None:
-            population = self.population_manager.population
-        if self.selection_method not in self.selection_methods:
-            raise ValueError(f"Invalid selection method: {self.selection_method}")
-
-        # Call the appropriate selection method dynamically
-        method = self.selection_methods[self.selection_method]
-        if method in {SelectionMethods.roulette_selection, SelectionMethods.sus_selection}:
-            return method(population, total_score)
-        else:
-            return method(population)
-
-
 
     def visualize_generation(self) -> None:
         """
@@ -208,7 +186,7 @@ class GeneticAlgorithm():
         self.visualize_generation()
 
         # Initialize lists to track generation scores
-        generation_scores = [self.best_solution.evaluation_score]
+        generation_scores = [self.population_manager.best_solution.evaluation_score]
         avg_scores = [self.population_manager.sum_evaluations() / self.population_size]
 
         # Iterate through the generations
