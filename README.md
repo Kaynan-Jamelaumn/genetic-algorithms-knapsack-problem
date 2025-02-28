@@ -80,9 +80,10 @@ Initializes the genetic algorithm with the provided parameters.
 - `"bit_flip"`: Bit-flip mutation.
 - `"swap_mutation"`: Swap mutation, swap two genes in the chromosome.
 - `"scramble_mutation"`: Scramble mutation schuffles some genes.
-- `"random"`: Random mutation.
+- `"random"`: choose a random mutation.
 - `"inversion_mutation"`: Reverses a random subsection of the chromosome
 - `"duplicate_mutation"`: Duplicate mutation by duplicating a random subsection of the chromosome and inserting it at a random position.
+- `"insertion_mutation"`: Moves a single gene to a new random position.
 
 ####  Migration Methods 🌍
 - `"ring"`: Migrants are sent to the next island in a ring-like fashion.

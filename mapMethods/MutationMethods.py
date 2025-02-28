@@ -29,9 +29,12 @@ class MutationMethods:
         Apply a random mutation method to the individual.
         """
         methods = [
-            lambda ind: MutationMethods.mutation(ind, mutation_chance),
+            lambda ind: MutationMethods.bit_flip(ind, mutation_chance),
             MutationMethods.swap_mutation,
-            MutationMethods.scramble_mutation
+            MutationMethods.scramble_mutation,
+            MutationMethods.inversion_mutation,
+            MutationMethods.duplicate_mutation,
+            MutationMethods.insertion_mutation
         ]
         random.choice(methods)(individual)
 
@@ -50,3 +53,13 @@ class MutationMethods:
         Apply a random duplication gene mutation method to the individual.
         """
         individual.duplicate_mutation()
+
+
+
+    @staticmethod
+    def insertion_mutation(individual: Individual) -> None:
+        """
+        Apply a insertion mutation to the individual.
+        """
+        individual.insertion_mutation()
+

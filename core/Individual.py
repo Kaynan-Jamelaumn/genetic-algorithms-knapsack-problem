@@ -200,3 +200,20 @@ class Individual:
             subset = self.chromosome[start:end]
             insert_pos = random.randint(0, len(self.chromosome))
             self.chromosome[insert_pos:insert_pos] = subset
+
+
+    def insertion_mutation(self) -> None:
+        """
+        Perform insertion mutation by selecting a random gene and inserting it at a different random position.
+        """
+        if len(self.chromosome) > 1:
+            # Select a random gene to move
+            gene_idx = random.randint(0, len(self.chromosome) - 1)
+            gene = self.chromosome[gene_idx]
+            
+            # Remove the selected gene from its current position
+            self.chromosome.pop(gene_idx)
+            
+            # Insert the gene at a new random position
+            new_pos = random.randint(0, len(self.chromosome))
+            self.chromosome.insert(new_pos, gene)
