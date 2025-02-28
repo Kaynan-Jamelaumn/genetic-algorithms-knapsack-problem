@@ -1,8 +1,8 @@
-from SelectionMethods import *
-from CrossOverMethods import *
-from MutationMethods import *
-from MigrationMethods import *
-from ReplacementMethods import *
+from mapMethods.SelectionMethods import *
+from mapMethods.CrossOverMethods import *
+from mapMethods.MutationMethods import *
+from mapMethods.MigrationMethods import *
+from mapMethods.ReplacementMethods import *
 from typing import Callable, Optional
 
 class GeneticOperators:

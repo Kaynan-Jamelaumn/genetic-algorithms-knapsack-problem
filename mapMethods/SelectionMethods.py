@@ -2,7 +2,7 @@ from random import random, choice, sample
 from math import exp  # Import exp for Boltzmann selection
 
 
-from Individual import Individual 
+from core.Individual import Individual 
 class SelectionMethods:
     @staticmethod
     def roulette_selection(population: list[Individual], total_score: float, *args: any) -> Individual:

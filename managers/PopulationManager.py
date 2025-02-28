@@ -1,11 +1,12 @@
-from Individual import Individual
-from GeneticOperators import *
+from core.Individual import Individual
+from managersAndHelpers.GeneticOperators import *
 class PopulationManager:
     def __init__(self, population_size: int):
         self.population_size = population_size
         self.population: list[Individual] = []
         self.best_solution: Individual = None
         self.solution_list: list[float] = []
+
 
     def initialize_population(self, spaces: list[float], values: list[float], space_limit: float) -> None:
         """

@@ -1,4 +1,4 @@
-from Individual import Individual
+from core.Individual import Individual
 class CrossoverMethods:
     @staticmethod
     def single_point_crossover(parent1: Individual , parent2: Individual) -> tuple[Individual, Individual]:

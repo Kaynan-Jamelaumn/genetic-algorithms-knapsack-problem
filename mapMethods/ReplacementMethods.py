@@ -1,6 +1,6 @@
 
 import random
-from Individual import Individual
+from core.Individual import Individual
 
 class ReplacementMethods:
 

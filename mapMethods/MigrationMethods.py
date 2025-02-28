@@ -1,5 +1,5 @@
-from Individual import Individual
-from ReplacementMethods import *
+from core.Individual import Individual
+from mapMethods.ReplacementMethods import *
 from typing import Callable
 import inspect
 

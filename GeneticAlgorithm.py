@@ -1,15 +1,15 @@
-from Individual import Individual 
+from core.Individual import Individual 
 
-from SelectionMethods import *
-from Visualization import *
-from CrossOverMethods import *
-from MutationMethods import *
-from ReplacementMethods import *
-from MigrationMethods import *
-from GeneticOperators import *
-from PopulationManager import *
+from mapMethods.SelectionMethods import *
+from core.Visualization import *
+from mapMethods.CrossOverMethods import *
+from mapMethods.MutationMethods import *
+from mapMethods.ReplacementMethods import *
+from mapMethods.MigrationMethods import *
+from managersAndHelpers.GeneticOperators import *
+from managersAndHelpers.PopulationManager import *
+from managersAndHelpers.IslandManager import *
 
-from typing import Callable
 
 class GeneticAlgorithm():
     def __init__(self, 
@@ -56,6 +56,7 @@ class GeneticAlgorithm():
         )
         self.population_manager = PopulationManager(population_size)
 
+
         self.migration_methods = {
             "ring_migration": MigrationMethods.ring_migration,
             "random_migration": MigrationMethods.random_migration,
@@ -70,6 +71,8 @@ class GeneticAlgorithm():
             "best": ReplacementMethods.best_individual_replacement,
             "worst": ReplacementMethods.worst_individual_replacement,
         }
+
+        self.island_manager = IslandManager(self.population_manager, self.genetic_operators, self.migration_methods, self.replacement_methods, self.calculate_mutation_rate)
 
 
 
@@ -242,7 +245,7 @@ class GeneticAlgorithm():
         self.initialize_and_evaluate(spaces, values, space_limit)
 
         # Split the population into isolated islands
-        self.split_into_islands(num_islands)
+        self.island_manager.split_into_islands(num_islands)
         self.population_manager.sort_population()
         self.population_manager.best_solution = self.population_manager.population[0]
         self.solution_list = [self.population_manager.best_solution.evaluation_score]
@@ -255,27 +258,27 @@ class GeneticAlgorithm():
         # Iterate through the generations
         for gen in range(num_generations):
             # Evolve each island individually
-            for island_idx in range(len(self.islands)):
-                self.islands[island_idx] = self.evolve_island(
-                    self.islands[island_idx], mutation_rate, adaptative_mutation, elitism_chance
+            for island_idx in range(len(self.island_manager.islands)):
+                self.island_manager.islands[island_idx] = self.island_manager.evolve_island(
+                    self.island_manager.islands[island_idx], mutation_rate, adaptative_mutation, elitism_chance
                 )
                 # Update the best individual for the island
-                self.population_manager.update_best_solution(self.islands[island_idx][0])
+                self.population_manager.update_best_solution(self.island_manager.islands[island_idx][0])
 
             # Perform migration between islands at the specified interval
             if (gen + 1) % migration_interval == 0:
-                self.apply_migration_method(num_migrants)
+                self.island_manager.apply_migration_method(num_migrants, self.genetic_operators.migration_method, self.genetic_operators.primary_replacement_method, self.genetic_operators.secondary_replacement_method,  self.genetic_operators.migration_args)
 
             # Track the best score of the generation from all islands
-            current_gen_best = max(island[0].evaluation_score for island in self.islands)
+            current_gen_best = max(island[0].evaluation_score for island in self.island_manager.islands)
             generation_scores.append(current_gen_best)
 
             # Calculate the average score across all islands
-            total_score_all = sum(sum(ind.evaluation_score for ind in island) for island in self.islands)
-            avg_scores.append(total_score_all / sum(len(island) for island in self.islands))
+            total_score_all = sum(sum(ind.evaluation_score for ind in island) for island in self.island_manager.islands)
+            avg_scores.append(total_score_all / sum(len(island) for island in self.island_manager.islands))
 
         # Update the best solution across all islands
-        self.update_final_island_best()
+        self.island_manager.update_final_island_best()
 
         # Return the scores for each generation
         return generation_scores, avg_scores
@@ -319,54 +322,4 @@ class GeneticAlgorithm():
         self.population_manager.population = original_population  # Restore original population
         return evolved_island
 
-    def split_into_islands(self, num_islands: int) -> None:
-        """
-        Splits the main population into multiple islands (sub-populations).
-
-        :param num_islands: The number of islands to create.
-        """
-        island_size = self.population_size // num_islands # Determine size per island by dividing the total population size by the number of islands
-        self.islands = []
-        for i in range(num_islands):
-            start = i * island_size # Calculate the starting index for the current island's population
-            end = start + island_size   # Calculate the ending index for the current island's population
-            if i == num_islands - 1:  # Ensure the last island gets any remaining individuals
-                end = self.population_size
-            self.islands.append(self.population_manager.population[start:end])  # Append the slice of the population corresponding to the current island to the islands list
-
-
-    def update_final_island_best(self) -> None:
-        """
-        After all generations, updates the best solution by considering all islands.
-        """
-        all_individuals = [ind for island in self.islands for ind in island]  # Flatten all islands into one list
-        all_individuals.sort(key=lambda x: x.evaluation_score, reverse=True)  # Sort by best fitness
-        self.population_manager.best_solution = all_individuals[0]  # Pick the top individual
-        self.solution_list.append(self.population_manager.best_solution.evaluation_score)  # Store the best solution score
-
-
-
-    def apply_migration_method(self, num_migrants: int) -> None:
-        """
-        Apply the specified migration method to the island model.
-        """
-        if self.migration_method not in self.migration_methods:
-            raise ValueError(f"Invalid replacement method: {self.migration_method}")
-        migration_function = self.migration_methods[self.migration_method]
-        # Get the function's parameters
-        sig = inspect.signature(migration_function)
-        params = list(sig.parameters.values())
-        
-        # Calculate how many additional parameters the function expects after the first 5
-        # (islands, num_migrants, replacement_methods, primary, secondary)
-        num_extra_params = max(len(params) - 5, 0)
-        args_to_pass = self.migration_args[:num_extra_params]  # Ensure non-negative
-        
-        # Slice migration_args to match the number of extra parameters
-        args_to_pass = self.migration_args[:num_extra_params]
-        migration_function(self.islands,
-                            num_migrants,
-                            self.replacement_methods,
-                            self.primary_replacement_method,
-                            self.secundary_replacement_method,
-                            *args_to_pass)
+   
