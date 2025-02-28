@@ -289,37 +289,4 @@ class GeneticAlgorithm():
         self.population_manager.evaluate_population()
 
 
-    def evolve_island(self, island: int, mutation_rate: float, adaptative_mutation: bool, elitism_chance: float):
-        """
-        Evolves an island's population for one generation.
-
-        Steps:
-        1. Temporarily replaces the main population with the island's population.
-        2. Calculates the total fitness score of the island's individuals.
-        3. Adjusts mutation rate if adaptive mutation is enabled.
-        4. Generates a new population for the island using selection, crossover, and mutation.
-        5. Evaluates and sorts the new population based on fitness.
-        6. Restores the original population and returns the evolved island.
-
-        :param island: The sub-population (island) to evolve.
-        :param mutation_rate: The base probability of mutation for each individual.
-        :param adaptative_mutation: Whether to adjust mutation rate dynamically.
-        :param elitism_chance: The percentage of top individuals retained unaltered.
-        :return: The evolved island's population.
-        """
-        original_population = self.population_manager.population  # Store the original population
-        self.population_manager.population = island.copy()  # Work on the island's population
-
-        total_score = self.population_manager.sum_evaluations()  # Compute total fitness score
-        adapted_rate = self.calculate_mutation_rate(adaptative_mutation, mutation_rate)  # Adjust mutation rate if needed
-        new_population = self.population_manager.generate_new_population(self.population_manager.population, total_score, adapted_rate, elitism_chance, self.genetic_operators)
-
-        self.population_manager.population = new_population  # Replace with the new evolved population
-        self.population_manager.evaluate_population()  # Evaluate fitness
-        self.population_manager.sort_population()  # Sort by best fitness
-
-        evolved_island = self.population_manager.population  # Store the evolved island
-        self.population_manager.population = original_population  # Restore original population
-        return evolved_island
-
    
