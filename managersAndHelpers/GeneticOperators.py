@@ -57,6 +57,7 @@ class GeneticOperators:
             "scramble_mutation": MutationMethods.scramble_mutation,
             "random": MutationMethods.random_mutation,
             "inversion_mutation" MutationMethods.inversion_mutation
+            "duplicate_mutation" MutationMethods.duplicate_mutation
         }
 
     def select_parent(self, population: list, total_score: Optional[float] = None) -> Individual:

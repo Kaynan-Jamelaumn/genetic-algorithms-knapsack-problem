@@ -41,3 +41,12 @@ class MutationMethods:
         Perform inversion mutation by reversing a random subsection of the chromosome.
         """
         individual.inversion_mutation()
+
+
+
+    @staticmethod
+    def duplicate_mutation(individual: Individual) -> None:
+        """
+        Apply a random duplication gene mutation method to the individual.
+        """
+        individual.duplicate_mutation()

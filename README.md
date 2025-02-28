@@ -82,6 +82,7 @@ Initializes the genetic algorithm with the provided parameters.
 - `"scramble_mutation"`: Scramble mutation schuffles some genes.
 - `"random"`: Random mutation.
 - `"inversion_mutation"`: Reverses a random subsection of the chromosome
+- `"duplicate_mutation"`: Duplicate mutation by duplicating a random subsection of the chromosome and inserting it at a random position.
 
 ####  Migration Methods 🌍
 - `"ring"`: Migrants are sent to the next island in a ring-like fashion.

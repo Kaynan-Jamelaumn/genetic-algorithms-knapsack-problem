@@ -188,3 +188,15 @@ class Individual:
         if len(self.chromosome) > 1:
             start, end = sorted(random.sample(range(len(self.chromosome)), 2))
             self.chromosome[start:end] = self.chromosome[start:end][::-1]
+
+            @staticmethod
+
+    def duplicate_mutation(self) -> None:
+        """
+        Perform duplicate mutation by duplicating a random subsection of the chromosome and inserting it at a random position.
+        """
+        if len(self.chromosome) > 1:
+            start, end = sorted(random.sample(range(len(self.chromosome)), 2))
+            subset = self.chromosome[start:end]
+            insert_pos = random.randint(0, len(self.chromosome))
+            self.chromosome[insert_pos:insert_pos] = subset
