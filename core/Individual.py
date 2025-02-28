@@ -179,3 +179,9 @@ class Individual:
             start, end = sorted(sample(range(len(self.chromosome)), 2))
             if start < end:  # Ensure a valid range
                 self.chromosome[start:end] = random.sample(self.chromosome[start:end], len(self.chromosome[start:end]))
+
+
+    def inversion_mutation(self) -> None:
+            if len(self.chromosome) > 1:
+                start, end = sorted(random.sample(range(len(self.chromosome)), 2))
+                self.chromosome[start:end] = self.chromosome[start:end][::-1]

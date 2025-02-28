@@ -78,9 +78,10 @@ Initializes the genetic algorithm with the provided parameters.
 
 #### Mutation Methods ⚙️
 - `"bit_flip"`: Bit-flip mutation.
-- `"swap_mutation"`: Swap mutation.
-- `"scramble_mutation"`: Scramble mutation.
+- `"swap_mutation"`: Swap mutation, swap two genes in the chromosome.
+- `"scramble_mutation"`: Scramble mutation schuffles some genes.
 - `"random"`: Random mutation.
+- `"inversion_mutation"`: Reverses a random subsection of the chromosome
 
 ####  Migration Methods 🌍
 - `"ring"`: Migrants are sent to the next island in a ring-like fashion.

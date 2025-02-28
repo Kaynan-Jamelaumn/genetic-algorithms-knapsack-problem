@@ -34,3 +34,10 @@ class MutationMethods:
             MutationMethods.scramble_mutation
         ]
         random.choice(methods)(individual)
+
+    @staticmethod
+    def inversion_mutation(individual: Individual) -> None:
+        """
+        Perform inversion mutation by reversing a random subsection of the chromosome.
+        """
+        individual.inversion_mutation()
