@@ -182,6 +182,9 @@ class Individual:
 
 
     def inversion_mutation(self) -> None:
-            if len(self.chromosome) > 1:
-                start, end = sorted(random.sample(range(len(self.chromosome)), 2))
-                self.chromosome[start:end] = self.chromosome[start:end][::-1]
+        """
+        Perform inversion mutation by reversing a random subsection of the chromosome.
+        """
+        if len(self.chromosome) > 1:
+            start, end = sorted(random.sample(range(len(self.chromosome)), 2))
+            self.chromosome[start:end] = self.chromosome[start:end][::-1]
